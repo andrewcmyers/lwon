@@ -1,0 +1,31 @@
+{ introduces dictionary. Elements are key: value pairs, where keys are string values.
+
+[ introduces array. Elements are one per line but delimited by commas. Elements may be quoted to escape
+    commas, with same rules as string values.
+
+" introduces string value. Extends until closing unescaped ", and may contain multiple lines.
+    Leading whitespace on lines is ignored up to the column of the first non-whitespace character.
+    Closing whitespace on first line is ignored, if there is no non-whitespace text following the ".
+    Escape sequences are supported, including "\ " to denote a literal
+    space character. A \ at the end of the line means to ignore the newline.
+    A newline is interpreted as the standard newline sequence on the current machine.
+
+Other non-reserved non-whitespace characters introduce string values that extend until the next natural delimiter.
+
+Natural delimiters depends on context.
+    For dictionary keys, it is a colon or [ or { or ". It is an error to have a newline delimiter.
+    For dictionary values, it is a newline.
+    For array elements, it is a comma or a newline.
+
+Arrays are automatically multidimensional, with rows as the major dimension
+if there are rows. A CSV file can be surrounded by brackets [] and be
+interpreted largely as is. Double, triple, etc. newlines can be used to
+introduce even higher dimensions.
+
+Some reserved characters that cannot begin a value: |, $, +
+
+Implicit outer object:
+
+The top-level object need not be explicitly delimited; it may be
+implicitly understood to be a dictionary or array, which case the
+initial { or [ is not used.
