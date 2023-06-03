@@ -92,7 +92,7 @@ public class Parser {
             Dictionary.Builder b = new Dictionary.Builder();
             for (;;) {
                 scanner.whitespace();
-                if (scanner.peek() == '}') break;
+                if (scanner.peek() == '}' || scanner.peek() == -1) break;
                 String key = parseKey(start);
                 if (scanner.peek() == ':')  {
                     scanner.next();
@@ -301,6 +301,8 @@ public class Parser {
         scanner.whitespace();
         try {
             for (;;) {
+                skipBlanks();
+                if (!scanner.hasNext()) return builder.build(here);
                 here = scanner.location();
                 DataObject obj = parse(here, ",]");
                 builder.set(indices, obj);
@@ -315,8 +317,9 @@ public class Parser {
                         }
                         scanner.next();
                         break;
+                    case -1:
                     case ']':
-                        return builder.build(here);
+                        break;
                     case '\r':
                     case '\n':
                         int dimout = 0;
