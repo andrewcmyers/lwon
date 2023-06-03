@@ -5,7 +5,7 @@ This is a notation for representing structured data that is intended to be even 
 
 - Self-descriptive without an external schema.
 - Supports strings, dictionaries, and multidimensional arrays
-- Mostly backward compatible with CSV
+- Mostly backward compatible with CSV and JSON
 - Mostly looks like JSON, but with less syntactic overhead:
     - key names do not need quoting
     - single-line string values do not need quoting
