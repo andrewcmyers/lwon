@@ -1,7 +1,8 @@
-{ introduces dictionary. Elements are key: value pairs, where keys are string values.
+{ introduces a dictionary. Elements are key: value pairs, where keys
+  are string values. Keys may be repeated.
 
-[ introduces array. Elements are one per line but delimited by commas. Elements may be quoted to escape
-    commas, with same rules as string values.
+[ introduces an array. Elements are one per line but delimited by commas. Elements may be quoted to escape
+  commas, with same rules as string values.
 
 " introduces string value. Extends until closing unescaped ", and may contain multiple lines.
     Leading whitespace on lines is ignored up to the column of the first non-whitespace character.
@@ -13,14 +14,15 @@
 Other non-reserved non-whitespace characters introduce string values that extend until the next natural delimiter.
 
 Natural delimiters depends on context.
-    For dictionary keys, it is a colon or [ or { or ". It is an error to have a newline delimiter.
+    For dictionary keys, it is a colon or [ or { or ". It is an error
+        to have a newline delimiter. 
     For dictionary values, it is a newline.
     For array elements, it is a comma or a newline.
 
-Arrays are automatically multidimensional, with rows as the major dimension
-if there are rows. A CSV file can be surrounded by brackets [] and be
-interpreted largely as is. Double, triple, etc. newlines can be used to
-introduce even higher dimensions.
+Arrays are automatically multidimensional, with rows as the major
+dimension if there are rows. Thus, a CSV file can be interpreted
+largely as is. Double, triple, etc. newlines can be used to introduce
+even higher dimensions.
 
 Some reserved characters that cannot begin a value: |, $, +
 
