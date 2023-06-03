@@ -40,7 +40,7 @@ public class Dump {
                         obj.unparse(b, 0);
                         System.out.println(b);
                     } catch (EOF e) {
-                        // exit
+                        break;
                     }
                 }
             } catch (Parser.SyntaxError e) {

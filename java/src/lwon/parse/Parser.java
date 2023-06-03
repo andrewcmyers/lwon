@@ -98,7 +98,7 @@ public class Parser {
                     scanner.next();
                     scanner.whitespace();
                 }
-                DataObject value = parse(scanner.location(), "");
+                DataObject value = parse(scanner.location(), "}");
                 b.put(key, value);
                 scanner.whitespace();
                 if (scanner.peek() == ',') scanner.next();
@@ -163,6 +163,7 @@ public class Parser {
                               return new Text(b.toString(), start);
                           }
                       }
+                      break;
                   case '{':
                   case '[':
                       if (multiline) {
@@ -196,7 +197,7 @@ public class Parser {
                       }
                       break;
                   default:
-                      if (-1 != delimiters.indexOf(ch)) {
+                      if (!multiline && -1 != delimiters.indexOf(ch)) {
                           return new Text(b.toString(), start);
                       }
                       if (!ws.isEmpty()) {
@@ -275,6 +276,9 @@ public class Parser {
                     throw new SyntaxError("Invalid codepoint in character escape", where);
                 }
             }
+            case '}': return "}";
+            case ']': return "]";
+            case ':': return ":";
             default:
                 throw new SyntaxError("Illegal escape sequence", where);
         }
