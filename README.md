@@ -29,15 +29,17 @@ maintain by hand.
     space character. A \\ at the end of the line means to ignore the newline.
     A newline is interpreted as the standard newline sequence on the current machine.
 
-* Other non-reserved non-whitespace characters introduce implicit string values that extend until the next natural delimiter.
+* Other non-reserved non-whitespace characters introduce implicit string values that extend until the
+  next natural delimiter. Trailing whitespace up to the delimiter is removed. Delimiters other than
+  newline and colon *must* be preceded by some whitespace.
 
 ### Natural delimiters
 
 Natural delimiters depend on context.
-- For dictionary keys, it is a colon (:) or \[ or { or ". It is an error
-        to have a newline delimiter. 
+- For dictionary keys, it is a colon (`:`), `\[`, `{`, or `"`. It is an error
+  to have a newline delimiter. 
 - For dictionary values, it is a newline or closing brace.
-- For array elements, it is a comma, closing bracket, or newline.
+- For array elements, it is a comma, closing bracket (`\]`), or newline.
 
 ### Arrays
 
