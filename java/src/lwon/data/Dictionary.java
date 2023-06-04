@@ -36,7 +36,7 @@ public class Dictionary extends DataObject {
             mapping.get(e.key).add(e.value);
         }
     }
-    static class NotFound extends Exception {
+    public static class NotFound extends Exception {
         @Override public NotFound fillInStackTrace() { return this; }
     }
     public List<DataObject> get(Object key) throws NotFound {

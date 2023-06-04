@@ -3,9 +3,11 @@ package lwon.data;
 import easyIO.BacktrackScanner.Location;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 
 /** An N-dimensional array of DataObjects */
-public class Array extends DataObject {
+public class Array extends DataObject implements Iterable<DataObject> {
     /** The sizes of the dimensions. May be empty to signify a scalar.
      *  Dimensions are in column-major order, so the last dimension is
      *  the one corresponding to a sequential scan through the data array.
@@ -87,6 +89,10 @@ public class Array extends DataObject {
         b.append(System.lineSeparator());
         b.append("  ".repeat(indent));
         b.append("]");
+    }
+
+    public Iterator<DataObject> iterator() {
+        return Arrays.stream(data).iterator();
     }
 
     public static class Builder {

@@ -16,6 +16,10 @@ public class Text extends DataObject {
         return "\"" + StringEscapeUtils.escapeJson(data) + "\"";
     }
 
+    public String value() {
+        return data;
+    }
+
     @Override
     public void unparse(StringBuilder b, int indent) {
         b.append("\"");

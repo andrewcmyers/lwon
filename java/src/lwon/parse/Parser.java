@@ -111,7 +111,7 @@ public class Parser {
 
     private String parseKey(Location start) throws SyntaxError {
         Text t = parseText(false, ":", start);
-        return t.toString();
+        return t.value();
     }
 
     public static final String reservedChars = "{}[]:";
@@ -298,7 +298,6 @@ public class Parser {
 
     public Array parseArray(Location where) throws SyntaxError {
         Array.Builder builder = new Array.Builder();
-        int dimensions = 0;
         int[] indices = new int[0];
         Location here = where;
 
@@ -323,7 +322,7 @@ public class Parser {
                         break;
                     case -1:
                     case ']':
-                        break;
+                        return builder.build(here);
                     case '\r':
                     case '\n':
                         int dimout = 0;
