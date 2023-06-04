@@ -11,6 +11,9 @@ This is a notation for representing structured data that is intended to be even 
     - single-line string values do not need quoting
     - multi-line string values allowed without special escaping
 
+Parsing LWON is harder than parsing JSON, but the intention is to make the data easier to read and
+maintain by hand.
+
 ## Syntax
 
 `{` introduces a dictionary. Elements are key: value pairs, where keys
@@ -51,3 +54,25 @@ The top-level object need not be explicitly delimited; it may be
 implicitly understood to be a dictionary or array, which case the
 initial { or \[ is not used. CSV files can therefore be read as
 implicit top-level arrays.
+
+## Examples
+
+Personal information as a dictionary:
+```
+{
+  hair: brown
+  eyes: blue
+  height: 69
+  friends: [ alice, bob ]
+  credo: "Do unto others as you
+          would have them do unto you."
+}
+```
+
+A 2-D array (implicit outer object):
+```
+Country, Population, GDP
+USA, 338, 23.3
+China, 1411, 12.2
+Germany, 84, 3.7
+```
