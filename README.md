@@ -16,20 +16,20 @@ maintain by hand.
 
 ## Syntax
 
-`{` introduces a dictionary. Elements are key: value pairs, where keys
+* `{` introduces a dictionary. Elements are key: value pairs, where keys
   are string values. Keys may be repeated.
 
-`[` introduces an array. Elements are one per line but delimited by commas. Elements may be quoted to escape
+* `[` introduces an array. Elements are one per line but delimited by commas. Elements may be quoted to escape
   commas, with same rules as string values.
 
-`"` introduces a string value. It extends until the closing unescaped ", and may contain multiple lines.
+* `"` introduces an (explicit) string value. It extends until the closing unescaped ", and may contain multiple lines.
     Leading whitespace on lines is ignored up to the column of the first non-whitespace character.
     Closing whitespace on the first line is ignored, if there is no non-whitespace text following the ".
     Escape sequences are supported, including "\\ " to denote a literal
     space character. A \\ at the end of the line means to ignore the newline.
     A newline is interpreted as the standard newline sequence on the current machine.
 
-Other non-reserved non-whitespace characters introduce string values that extend until the next natural delimiter.
+* Other non-reserved non-whitespace characters introduce implicit string values that extend until the next natural delimiter.
 
 ### Natural delimiters
 
@@ -46,7 +46,9 @@ dimension if there are rows. Thus, a CSV file can be interpreted
 largely as is. Double, triple, etc. newlines can be used to introduce
 even higher dimensions.
 
-Some reserved characters cannot begin a value: |, $, +
+### Reserved characters
+
+Some reserved characters cannot begin an implicit string value: |, $, +, \
 
 ### Implicit outer objects:
 
@@ -66,6 +68,8 @@ Personal information as a dictionary:
   friends: [ alice, bob ]
   credo: "Do unto others as you
           would have them do unto you."
+  pets [ { name: fido, species: dog },
+         { name: tom, species: cat } ]
 }
 ```
 
