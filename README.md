@@ -30,8 +30,7 @@ maintain by hand.
     A newline is interpreted as the standard newline sequence on the current machine.
 
 * Other non-reserved non-whitespace characters introduce implicit string values that extend until the
-  next natural delimiter. Trailing whitespace up to the delimiter is removed. Delimiters other than
-  newline and colon *must* be preceded by some whitespace.
+  next natural delimiter. Trailing whitespace up to the delimiter is removed.
 
 ### Natural delimiters
 
@@ -68,6 +67,7 @@ Personal information as a dictionary:
   eyes: blue
   height: 69
   friends: [ alice, bob ]
+  state: New Mexico
   credo: "Do unto others as you
           would have them do unto you."
   pets [ { name: fido, species: dog },
