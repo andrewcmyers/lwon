@@ -1,4 +1,4 @@
-# lwon
+# LWON
 LightWeight Object Notation
 
 This is a notation for representing structured data that is intended to be even lighter-weight than JSON.
