@@ -36,10 +36,10 @@ maintain by hand.
 ### Natural delimiters
 
 Natural delimiters depend on context.
-- For dictionary keys, it is a colon (`:`), `\[`, `{`, or `"`. It is an error
+- For dictionary keys, it is a colon (`:`), `[`, `{`, or `"`. It is an error
   to have a newline delimiter. 
 - For dictionary values, it is a newline or closing brace.
-- For array elements, it is a comma, closing bracket (`\]`), or newline.
+- For array elements, it is a comma, closing bracket (`]`), or newline.
 
 ### Arrays
 
@@ -50,13 +50,13 @@ even higher dimensions.
 
 ### Reserved characters
 
-Some reserved characters cannot begin an implicit string value: |, $, +, \
+Some reserved characters cannot begin an implicit string value: `|`, `$`, `+`, `\`
 
 ### Implicit outer objects:
 
 The top-level object need not be explicitly delimited; it may be
 implicitly understood to be a dictionary or array, which case the
-initial { or \[ is not used. CSV files can therefore be read as
+initial `{` or `[` is not used. CSV files can therefore be read as
 implicit top-level arrays.
 
 ## Examples
