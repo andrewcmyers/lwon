@@ -22,11 +22,11 @@ maintain by hand.
 * `[` introduces an array. Elements are one per line but delimited by commas. Elements may be quoted to escape
   commas, with same rules as string values.
 
-* `"` introduces an (explicit) string value. It extends until the closing unescaped ", and may contain multiple lines.
+* `"` introduces an (explicit) string value. It extends until the closing unescaped `"`, and may contain multiple lines.
     Leading whitespace on lines is ignored up to the column of the first non-whitespace character.
-    Closing whitespace on the first line is ignored, if there is no non-whitespace text following the ".
-    Escape sequences are supported, including "\\ " to denote a literal
-    space character. A \\ at the end of the line means to ignore the newline.
+    Closing whitespace on the first line is ignored, if there is no non-whitespace text following the `"`.
+    Escape sequences are supported, including `"\ "` to denote a literal
+    space character. A backslash `\` at the end of the line means to ignore the newline.
     A newline is interpreted as the standard newline sequence on the current machine.
 
 * Other non-reserved non-whitespace characters introduce implicit string values that extend until the
