@@ -77,8 +77,10 @@ Personal information as a dictionary:
   height: 69
   friends: [ alice, bob ]
   state: New Mexico
+  # Note: No leading whitespace in the second line of the credo.
   credo: "Do unto others as you
           would have them do unto you."
+  # Note: values can be complex data with nested arrays and dictionaries.
   pets [ { name: fido, species: dog },
          { name: tom, species: cat } ]
 }
@@ -86,7 +88,9 @@ Personal information as a dictionary:
 
 A 2-D array (implicit outer object):
 ```
+# Header row follows (not special in LWON)
 Country, Population, GDP
+# Now, some data
 USA, 338, 23.3
 China, 1411, 12.2
 Germany, 84, 3.7
