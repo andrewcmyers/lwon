@@ -32,7 +32,7 @@ public class Array extends DataObject implements Iterable<DataObject> {
         int offset = dimensions.length - indices.length;
         int i = 0;
         for (int j = 0; j < indices.length; j++) {
-            i *= dimensions[j];
+            i *= dimensions[j + offset];
             i += indices[j];
         }
         return i;
@@ -79,21 +79,22 @@ public class Array extends DataObject implements Iterable<DataObject> {
             DataObject obj = get(indices);
             obj.unparse(b, indent + 1);
             int i = indices.length - 1;
+            int newlines = 0;
             for (; i >= 0; i--) {
                 int n = dimensions[i];
                 indices[i]++;
                 if (indices[i] < n) {
                     if (i == indices.length - 1) {
                         b.append(",");
-                    } else {
-                        b.append(System.lineSeparator());
-                        first = true;
                     }
                     break;
                 }
+                newlines++;
+                first = true;
                 for (int j = i; j < indices.length; j++) indices[j] = 0;
             }
             if (i < 0) break;
+            if (newlines > 0) b.append(System.lineSeparator().repeat(newlines));
         }
         b.append(System.lineSeparator());
         b.append("  ".repeat(indent));
