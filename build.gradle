@@ -41,7 +41,7 @@ tasks.withType(JavaCompile) {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17) // replace with your version
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
@@ -52,10 +52,9 @@ task updateSubmodules(type: Exec) {
 compileJava.dependsOn updateSubmodules
 
 shadowJar {
-    archiveBaseName.set('lwon') // Replace 'your-app' with your application name
-    archiveVersion.set('0.1.0') // Replace '0.1.0' with your version
+    archiveBaseName.set('lwon')
     archiveClassifier.set('')
     manifest {
-        attributes 'Main-Class': 'Dump' // Replace with your main class
+        attributes 'Main-Class': 'Dump'
     }
 }

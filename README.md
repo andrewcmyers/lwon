@@ -1,4 +1,5 @@
 # LWON
+
 LightWeight Object Notation
 
 This is a notation for representing structured data that is intended to be even lighter-weight than JSON.
@@ -16,11 +17,12 @@ maintain by hand.
 
 ## Syntax
 
-* `{` introduces a dictionary. Elements are key: value pairs, where keys
-  are string values. Keys may be repeated.
+* `{` introduces a dictionary, which is a sequence of key: value pairs, where keys
+   are string values. Keys may be repeated. Key/value pairs may optionally be separated by commas,
+   but note that commas are not a natural delimiter for short strings.
 
-* `[` introduces an array. Elements are one per line but delimited by commas. Elements may be quoted to escape
-  commas, with same rules as string values.
+* `[` introduces an array. Elements are delimited by commas. Elements may be quoted to escape
+   commas, with same rules as string values. Arrays are multidimensional, as described below.
 
 * `"` introduces an (explicit) string value. It extends until the closing unescaped `"`, and may contain multiple lines.
     Leading whitespace on lines is ignored up to the column of the first non-whitespace character.
@@ -29,7 +31,7 @@ maintain by hand.
     space character. A backslash `\` at the end of the line means to ignore the newline.
     A newline is interpreted as the standard newline sequence on the current machine.
 
-* Other non-reserved non-whitespace characters introduce implicit string values that extend until the
+* Other non-reserved non-whitespace characters introduce implicit "short strings" that extend until the
   next natural delimiter. Trailing whitespace up to the delimiter is removed.
 
 ### Natural delimiters

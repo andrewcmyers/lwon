@@ -31,6 +31,8 @@ while (<TESTS>) {
 
 }
 
-print "$success out of $tests tests succeeded\n";
+print "$success out of $tests tests succeeded.\n";
 
-print "failed tests: ", (join ", ", @failed), "\n";
+if ($success < $tests) {
+    print "failed tests: ", (join ", ", @failed), "\n";
+}

@@ -86,7 +86,7 @@ public class Parser {
             for (;;) {
                 scanner.whitespace();
                 if (scanner.peek() == '}' || scanner.peek() == -1) break;
-                String key = parseKey(start);
+                String key = parseKey(scanner.location());
                 if (scanner.peek() == ':')  {
                     scanner.next();
                     scanner.whitespace();
