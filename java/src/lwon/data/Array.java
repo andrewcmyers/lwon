@@ -66,11 +66,16 @@ public class Array extends DataObject implements Iterable<DataObject> {
     @Override
     public void unparse(StringBuilder b, int indent) {
         int[] indices = new int[dimensions.length];
-        b.append("  ".repeat(indent));
         b.append("[");
         b.append(System.lineSeparator());
+        boolean first = true;
         for (;;) {
-            b.append("  ".repeat(indent + 1));
+            if (first) {
+                b.append("  ".repeat(indent + 1));
+            } else {
+                b.append(" ");
+            }
+            first = false;
             DataObject obj = get(indices);
             obj.unparse(b, indent + 1);
             int i = indices.length - 1;
@@ -78,8 +83,12 @@ public class Array extends DataObject implements Iterable<DataObject> {
                 int n = dimensions[i];
                 indices[i]++;
                 if (indices[i] < n) {
-                    if (i == indices.length - 1) b.append(",");
-                    else b.append(System.lineSeparator());
+                    if (i == indices.length - 1) {
+                        b.append(",");
+                    } else {
+                        b.append(System.lineSeparator());
+                        first = true;
+                    }
                     break;
                 }
                 for (int j = i; j < indices.length; j++) indices[j] = 0;

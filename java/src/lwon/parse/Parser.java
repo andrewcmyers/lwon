@@ -25,16 +25,12 @@ public class Parser {
 
     private static final String UNEXPECTED_EOF = "Unexpected end of input";
 
-    public DataObject parse() throws SyntaxError {
-        try {
-            Location location = scanner.location();
-            return parse(location, "");
-        } catch (EOF e) {
-            throw new SyntaxError(UNEXPECTED_EOF, null);
-        }
+    public DataObject parse() throws SyntaxError, EOF {
+        Location location = scanner.location();
+        return parse(location, "");
     }
-    public DataObject parse(Location start, String delimiters) throws SyntaxError {
-        try {
+
+    public DataObject parse(Location start, String delimiters) throws EOF, SyntaxError {
             DataObject result;
             scanner.whitespace();
             Location first = scanner.location();
@@ -66,9 +62,6 @@ public class Parser {
                     return result;
                 }
             }
-        } catch (EOF e) {
-            throw new SyntaxError(UNEXPECTED_EOF, start);
-        }
     }
 
     private void expect(char expected) throws EOF, SyntaxError {
@@ -292,7 +285,7 @@ public class Parser {
                 scanner.next();
             }
         } catch (EOF exc) {
-            return;
+            // nothing left
         }
     }
 
@@ -327,7 +320,7 @@ public class Parser {
                     case '\n':
                         int dimout = 0;
                         try {
-                            for (; ; ) {
+                            for (;;) {
                                 scanner.newline();
                                 dimout++;
                             }
