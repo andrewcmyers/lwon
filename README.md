@@ -17,8 +17,9 @@ maintain by hand.
 
 ## Syntax
 
-* `{` introduces a dictionary, which is a sequence of key: value pairs, where keys
-   are string values. Keys may be repeated. Key/value pairs may optionally be separated by commas,
+* `{` introduces a dictionary, which is a sequence of key/value pairs, where keys
+   are string values. Keys may be repeated. Keys may be separated from values
+   by a colon (`:`). Key/value pairs may optionally be separated by commas,
    but note that commas are not a natural delimiter for short strings.
 
 * `[` introduces an array. Elements are delimited by commas. Elements may be quoted to escape

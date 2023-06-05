@@ -82,11 +82,16 @@ public class Parser {
 
     public Dictionary parseDictionary(Location start) throws SyntaxError {
         try {
+            Location here = start;
             Dictionary.Builder b = new Dictionary.Builder();
             for (;;) {
                 scanner.whitespace();
                 if (scanner.peek() == '}' || scanner.peek() == -1) break;
+                here = scanner.location();
                 String key = parseKey(scanner.location());
+                if (scanner.peek() == '\n') {
+                    throw new SyntaxError("keys must have a non-newline delimiter",  here);
+                }
                 if (scanner.peek() == ':')  {
                     scanner.next();
                     scanner.whitespace();
