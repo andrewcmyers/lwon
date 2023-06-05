@@ -46,7 +46,8 @@ any object data.
 Arrays are automatically multidimensional, with rows as the major
 dimension if there are rows. Thus, a CSV file can be interpreted
 largely as is. Double, triple, etc. newlines can be used to introduce
-even higher dimensions.
+even higher dimensions. Arrays have uniform dimensions: they are not
+ragged. To represent such structures, elements can be empty text.
 
 ### Natural delimiters
 
@@ -95,3 +96,10 @@ USA, 338, 23.3
 China, 1411, 12.2
 Germany, 84, 3.7
 ```
+
+See the directory `tests/` for more short examples.
+
+## Building
+
+The software can be built as a runnable JAR file using the command `gradle shadowJar`. The script `bin/dump` is an example using this API. It reads in a file
+as a sequence of LWON objects and prints each of them to standard output.
