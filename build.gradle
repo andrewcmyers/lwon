@@ -1,0 +1,61 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '7.1.1'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.apache.commons:commons-text:1.9'
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+}
+
+// Main class configuration
+mainClassName = 'Dump'
+
+// Set up jar task
+jar {
+    dependsOn compileJava
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+    from sourceSets.main.output
+}
+
+// Include all source directories
+sourceSets {
+    main {
+        java {
+            srcDirs = ['java/src', 'java/test', 'java/easyIO/src']
+        }
+    }
+}
+
+// Enable preview features
+tasks.withType(JavaCompile) {
+    options.compilerArgs += ["--enable-preview"]
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17) // replace with your version
+    }
+}
+
+task updateSubmodules(type: Exec) {
+    commandLine 'git', 'submodule', 'update', '--init'
+}
+
+compileJava.dependsOn updateSubmodules
+
+shadowJar {
+    archiveBaseName.set('lwon') // Replace 'your-app' with your application name
+    archiveVersion.set('0.1.0') // Replace '0.1.0' with your version
+    archiveClassifier.set('')
+    manifest {
+        attributes 'Main-Class': 'Dump' // Replace with your main class
+    }
+}

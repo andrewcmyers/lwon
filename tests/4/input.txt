@@ -1,0 +1,6 @@
+{
+    hair: brown
+    eyes: blue
+    height: 69
+    friends [ alice, bob ]
+}

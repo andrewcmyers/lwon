@@ -1,0 +1,36 @@
+#!/usr/bin/env perl
+
+print "$ARGV[0]\n";
+
+open(TESTS, "<tests/tests.lwon");
+
+my $tests = 0;
+my $success = 0;
+my @failed;
+
+while (<TESTS>) {
+    chomp;
+    my @test = split /\s*,\s*/;
+    $tests++;
+    my $dir = "tests/$test[0]";
+    my $options = $test[1];
+    my $input = "$dir/input.txt";
+    if (! -r $input) {
+        print "Not found: $input\n";
+    }
+    my $tmpfile = "/tmp/lwon.tmp.$$";
+    if ( 0 == system("bin/dump $options $dir/input.txt > $tmpfile")) {
+        if (0 == system("diff -u $dir/output.txt $tmpfile")) {
+            $success++;
+        } else {
+            push @failed, $test[0];
+        }
+    } else {
+        push @failed, $test[0];
+    }
+
+}
+
+print "$success out of $tests tests succeeded\n";
+
+print "failed tests: ", (join ", ", @failed), "\n";
