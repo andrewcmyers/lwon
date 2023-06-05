@@ -33,6 +33,7 @@ public class Dump {
                 while (true) {
                     try {
                         DataObject obj;
+                        parser.skipComments();
                         if (dictionary) obj = parser.parseDictionary(scanner.location());
                         else if (array) obj = parser.parseArray(scanner.location());
                         else obj = parser.parse();

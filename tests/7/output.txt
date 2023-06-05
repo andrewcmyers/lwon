@@ -1,0 +1,6 @@
+[
+  "Country", "Population", "GDP"
+  "USA", "338", "23.3"
+  "China", "1411", "12.2"
+  "Germany", "84", "3.7"
+]

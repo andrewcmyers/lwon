@@ -1,0 +1,15 @@
+# Comment at the beginning
+   # Another comment
+{
+    # Comments may appear in the middle of dictionary entries
+    # but there are no inline comments: a comment is on its own line.
+    hair: brown
+    eyes: blue
+    height: 69
+    friends [ alice, bob ]
+    blurb "This is interrupted by a
+    # Multiline strings can have comments in their middle
+                # and the comment may have whitespace to the left of
+                # the start point of the string.
+           comment."
+}

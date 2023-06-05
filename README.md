@@ -35,13 +35,11 @@ maintain by hand.
 * Other non-reserved non-whitespace characters introduce implicit "short strings" that extend until the
   next natural delimiter. Trailing whitespace up to the delimiter is removed.
 
-### Natural delimiters
+### Comments
 
-Natural delimiters depend on context.
-- For dictionary keys, it is a colon (`:`), `[`, `{`, or `"`. It is an error
-  to have a newline delimiter. 
-- For dictionary values, it is a newline or closing brace.
-- For array elements, it is a comma, closing bracket (`]`), or newline.
+A comment line is one whose first non-whitespace character is a number sign (`#`). Any such
+line is ignored completely. There are no inline comments: a line with a comment cannot include
+any object data.
 
 ### Arrays
 
@@ -49,6 +47,14 @@ Arrays are automatically multidimensional, with rows as the major
 dimension if there are rows. Thus, a CSV file can be interpreted
 largely as is. Double, triple, etc. newlines can be used to introduce
 even higher dimensions.
+
+### Natural delimiters
+
+Natural delimiters depend on context.
+- For dictionary keys, it is a colon (`:`), `[`, `{`, or `"`. It is an error
+  to have a newline delimiter. 
+- For dictionary values, it is a newline or closing brace.
+- For array elements, it is a comma, closing bracket (`]`), or newline.
 
 ### Reserved characters
 

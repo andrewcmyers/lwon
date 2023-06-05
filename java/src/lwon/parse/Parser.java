@@ -25,31 +25,39 @@ public class Parser {
 
     private static final String UNEXPECTED_EOF = "Unexpected end of input";
 
+    /** Parse an object from the input. All prior positions on the current line,
+     *  if any, are treated as if they were whitespace.
+     */
     public DataObject parse() throws SyntaxError, EOF {
         Location location = scanner.location();
+        skipComments();
         return parse(location, "");
     }
 
+    /** Parse an object from the input, assuming that start can be treated as the
+     *  starting position of the object. The characters in delimiters should be
+     *  treated as delimiters terminating this object.
+     *  Required: the current line is not a comment.
+     */
     public DataObject parse(Location start, String delimiters) throws EOF, SyntaxError {
             DataObject result;
-            scanner.whitespace();
             Location first = scanner.location();
+            skipWhitespace();
             int c = scanner.peek();
             switch (c) {
-                case -1:
-                    throw new SyntaxError(UNEXPECTED_EOF, start);
+                case -1: throw new EOF();
                 case '{':
-                    expect('{');
+                    first = expect('{');
                     result = parseDictionary(first);
                     expect('}');
                     return result;
                 case '[':
-                    expect('[');
+                    first = expect('[');
                     result = parseArray(first);
                     expect(']');
                     return result;
                 case '"':
-                    expect('"');
+                    first = expect('"');
                     result = parseText(true, delimiters, first);
                     expect('"');
                     return result;
@@ -64,12 +72,16 @@ public class Parser {
             }
     }
 
-    private void expect(char expected) throws EOF, SyntaxError {
+    /** Read the expected character from the scanner or throw SyntaxError
+     *  (or EOF, as appropriate) if something else is found.
+     */
+    private Location expect(char expected) throws EOF, SyntaxError {
         Location here = scanner.location();
         char c = scanner.next();
         if (c != expected) {
             throw new SyntaxError("Expected " + unparseChar(expected), here);
         }
+        return here;
     }
 
     private String unparseChar(char c) {
@@ -80,12 +92,16 @@ public class Parser {
         return (-1 != reservedChars.indexOf(c));
     }
 
+    /** Parse a dictionary from the scanner. The scanner position is required to be after
+     *  the opening brace and on either a real character of dictionary content (i.e., not
+     *  whitespace or a comment), or the closing brace.
+     */
     public Dictionary parseDictionary(Location start) throws SyntaxError {
         try {
             Location here = start;
             Dictionary.Builder b = new Dictionary.Builder();
             for (;;) {
-                scanner.whitespace();
+                skipWhitespace();
                 if (scanner.peek() == '}' || scanner.peek() == -1) break;
                 here = scanner.location();
                 String key = parseKey(scanner.location());
@@ -94,11 +110,11 @@ public class Parser {
                 }
                 if (scanner.peek() == ':')  {
                     scanner.next();
-                    scanner.whitespace();
+                    skipWhitespace();
                 }
                 DataObject value = parse(scanner.location(), "}");
                 b.put(key, value);
-                scanner.whitespace();
+                skipWhitespace();
                 if (scanner.peek() == ',') scanner.next();
             }
             return b.build(start);
@@ -138,6 +154,7 @@ public class Parser {
                       }
                       try {
                           scanner.newline();
+                          skipComments();
                           leftColumn = skipLeadingSpace(leftColumn);
                       } catch (UnexpectedInput exc) {
                           b.append(parseEscapeSequence());
@@ -186,9 +203,8 @@ public class Parser {
                       try {
                           if (!multiline) return new Text(b.toString(), start);
                           scanner.newline();
+                          skipComments();
                           b.append(System.lineSeparator());
-                          while (scanner.peek() == ' ' && scanner.column() <= leftColumn)
-                              scanner.next();
                           leftColumn = skipLeadingSpace(leftColumn);
                       } catch (UnexpectedInput e) {
                           b.append(Character.toChars(ch));
@@ -207,8 +223,47 @@ public class Parser {
               }
           }
       } catch (EOF e) {
-          throw new Error("Can't happen");
+          throw new SyntaxError(UNEXPECTED_EOF, start);
       }
+    }
+
+    public static final String blanks = " \t\r";
+    public static final String lineTerminators = "\n\f";
+    public static final String whitespace = blanks + lineTerminators;
+
+    /** Requires: scanner is at the beginning of a line.
+     *  Effect: Skip past any comment lines to the beginning
+     *  of the next line that is not a comment.
+     */
+    public void skipComments() throws EOF {
+        for (;;) { // loop over lines
+            scanner.mark();
+            charloop: for (;;) { // loop over initial characters
+                int ch = scanner.peek();
+                switch (ch) {
+                    case -1:
+                        scanner.abort();
+                        throw new EOF();
+                    case '\n':
+                        scanner.abort(); // blank line
+                        return;
+                    case '#':
+                        scanner.accept();
+                        scanner.next();
+                        while (-1 == lineTerminators.indexOf(ch)) {
+                            ch = scanner.next();
+                        }
+                        break charloop;
+                    default:
+                        if (-1 != blanks.indexOf(ch)) {
+                            scanner.next();
+                        } else {
+                            scanner.abort(); // non-comment line: rewind and return
+                            return;
+                        }
+                }
+            }
+        }
     }
 
     private int skipLeadingSpace(int leftColumn) throws EOF {
@@ -276,13 +331,12 @@ public class Parser {
             }
             case '}': return "}";
             case ']': return "]";
+            case '#': return "#";
             case ':': return ":";
             default:
                 throw new SyntaxError("Illegal escape sequence", where);
         }
     }
-
-    private static final String blanks = " \t\f\r";
 
     public void skipBlanks() {
         try {
@@ -293,17 +347,29 @@ public class Parser {
             // nothing left
         }
     }
+    public void skipWhitespace() {
+        try {
+            while (scanner.hasNext() && -1 != whitespace.indexOf(scanner.peek())) {
+                if (scanner.next() == '\n') skipComments();
+            }
+        } catch (EOF exc) {
+            // nothing left
+        }
+    }
 
+    /** Parse an array from the scanner. The scanner position is required to be after
+     *  the opening bracket and on either a real character of array content or the
+     *  closing bracket.
+     */
     public Array parseArray(Location where) throws SyntaxError {
         Array.Builder builder = new Array.Builder();
         int[] indices = new int[0];
         Location here = where;
 
-        scanner.whitespace();
         try {
             for (;;) {
-                skipBlanks();
-                if (!scanner.hasNext()) return builder.build(here);
+                skipWhitespace();
+                if (!scanner.hasNext() || scanner.peek() == ']') return builder.build(here);
                 here = scanner.location();
                 DataObject obj = parse(here, ",]");
                 builder.set(indices, obj);
@@ -317,6 +383,7 @@ public class Parser {
                             indices[indices.length - 1]++;
                         }
                         scanner.next();
+                        skipWhitespace();
                         break;
                     case -1:
                     case ']':
@@ -326,10 +393,12 @@ public class Parser {
                         int dimout = 0;
                         try {
                             for (;;) {
+                                here = scanner.location();
                                 scanner.newline();
+                                skipComments();
                                 dimout++;
                             }
-                        } catch (UnexpectedInput exc) {
+                        } catch (UnexpectedInput|EOF exc) {
                             // done
                         }
                         int index = indices.length - 1 - dimout;

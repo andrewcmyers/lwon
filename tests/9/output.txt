@@ -1,0 +1,9 @@
+{
+  hair: "brown",
+  eyes: "blue",
+  height: "69",
+  friends: [
+    "alice", "bob"
+  ],
+  blurb: "This is interrupted by a\ncomment."
+}
