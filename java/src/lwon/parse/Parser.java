@@ -344,6 +344,7 @@ public class Parser {
             case ']': return "]";
             case '#': return "#";
             case ':': return ":";
+            case '\n': return "";
             default:
                 throw new SyntaxError("Illegal escape sequence", where);
         }
