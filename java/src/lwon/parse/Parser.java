@@ -137,11 +137,22 @@ public class Parser {
       try {
           StringBuilder b = new StringBuilder();
           StringBuilder ws = new StringBuilder();
+          int leftColumn = scanner.column();
+          if (multiline) {
+              scanner.mark();
+              skipBlanks();
+              if (scanner.peek() == '\n') {
+                  scanner.accept();
+                  scanner.next();
+                  leftColumn = skipLeadingSpace(leftColumn);
+              } else {
+                  scanner.abort();
+              }
+          }
           if (!multiline && -1 != reservedChars.indexOf(scanner.peek())) {
               throw new SyntaxError("Unexpected reserved character " +
                   Character.toString(scanner.peek()) + " at start of short string", start);
           }
-          int leftColumn = scanner.column();
           for (;;) {
               int ch = scanner.peek();
               switch (ch) {
