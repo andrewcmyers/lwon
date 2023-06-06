@@ -13,6 +13,7 @@ import org.apache.commons.text.StringEscapeUtils;
 public class Parser {
     private Scanner scanner;
 
+    /** Create a Parser reading from the specified input. */
     public Parser(Scanner input) {
         scanner = input;
     }
@@ -94,6 +95,12 @@ public class Parser {
         return (-1 != reservedChars.indexOf(c));
     }
 
+    /** Parse an implicit dictionary data object from the scanner. Throw EOF if there is no
+     *  data there and SyntaxError if there is a syntax error. */
+    public DataObject parseDictionary() throws SyntaxError, EOF {
+        return parseDictionary(scanner.location());
+    }
+
     /** Parse a dictionary from the scanner. The scanner position is required to be after
      *  the opening brace and on either a real character of dictionary content (i.e., not
      *  whitespace or a comment), or the closing brace.
@@ -130,7 +137,7 @@ public class Parser {
         return t.value();
     }
 
-    public static final String reservedChars = "{}[]:";
+    private static final String reservedChars = "{}[]:";
 
     /** parse text that is either single-line or multi-line text. In the former
      *  case, a newline is a delimiter.
@@ -240,13 +247,14 @@ public class Parser {
       }
     }
 
-    public static final String blanks = " \t\r";
-    public static final String lineTerminators = "\n\f";
-    public static final String whitespace = blanks + lineTerminators;
+    private static final String blanks = " \t\r";
+    private static final String lineTerminators = "\n\f";
+    private static final String whitespace = blanks + lineTerminators;
 
-    /** Requires: scanner is at the beginning of a line.
-     *  Effect: Skip past any comment lines to the beginning
+    /**
+     *  Skip past any comment lines to the beginning
      *  of the next line that is not a comment.
+     *  Requires: scanner is at the beginning of a line.
      */
     public void skipComments() throws EOF {
         for (;;) { // loop over lines
@@ -352,6 +360,7 @@ public class Parser {
         }
     }
 
+    /** Skip past characters considered blanks (which do not include newlines) */
     public void skipBlanks() {
         try {
             while (scanner.hasNext() && -1 != blanks.indexOf(scanner.peek())) {
@@ -361,6 +370,7 @@ public class Parser {
             // nothing left
         }
     }
+    /** Skip past characters considered whitespace (including newlines) and comments. */
     public void skipWhitespace() {
         try {
             while (scanner.hasNext() && -1 != whitespace.indexOf(scanner.peek())) {
@@ -371,6 +381,11 @@ public class Parser {
         }
     }
 
+    /** Parse an implicit array data object from the scanner. Throw EOF if there is no
+     *  data there and SyntaxError if there is a syntax error. */
+    public DataObject parseArray() throws SyntaxError, EOF {
+        return parseArray(scanner.location());
+    }
     /** Parse an array from the scanner. The scanner position is required to be after
      *  the opening bracket and on either a real character of array content or the
      *  closing bracket.

@@ -38,9 +38,8 @@ public class Dump {
                 while (true) {
                     try {
                         DataObject obj;
-                        parser.skipComments();
-                        if (dictionary) obj = parser.parseDictionary(scanner.location());
-                        else if (array) obj = parser.parseArray(scanner.location());
+                        if (dictionary) obj = parser.parseDictionary();
+                        else if (array) obj = parser.parseArray();
                         else obj = parser.parse();
                         StringBuilder b = new StringBuilder();
                         obj.unparse(b, 0);
