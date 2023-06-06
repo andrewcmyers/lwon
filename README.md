@@ -2,46 +2,76 @@
 
 LightWeight Object Notation
 
-LWON is a notation for representing structured data. LWON is intended to be even lighter-weight than JSON.
+LWON is a notation for representing structured data. LWON is intended to feel lighter-weight than JSON.
 Parsing LWON is harder than parsing JSON, but the intention is to make the data easier to read and
-maintain by hand, without special tools.
+maintain by hand, without special tools. It is particularly handy as a syntax for configuration files.
 
-Goals:
+*Goals:*
 
 - Self-descriptive without an external schema.
+
 - Supports strings, dictionaries, and multidimensional arrays
+
 - Mostly backward compatible with CSV and JSON
+
 - Mostly looks like JSON, but with less syntactic overhead:
-    - key names do not need quoting
-    - single-line string values ("short strings") do not need quoting
-    - multi-line string values ("long strings") allowed without special escaping
-    - multidimensional arrays supported directly 
+
+    - key names do not need quoting.
+    - single-line string values ("short strings") do not need quoting.
+    - multi-line string values ("long strings") are allowed without special escaping.
+    - multidimensional arrays are supported directly.
 
 ## Syntax
 
-* `{` introduces a dictionary, which is a sequence of key/value pairs, where keys
-   are string values. Keys may be repeated. Keys may be separated from values
-   by a colon (`:`). Key/value pairs may optionally be separated by commas,
-   but note that commas are not a natural delimiter for short strings.
+* `{` introduces a dictionary, which is a sequence of key-value pairs,
+  where keys are string values. Keys may be repeated. Keys may be
+  separated from values by a colon (`:`). Key/value pairs may optionally
+  be separated by commas, but note that commas are not a natural
+  delimiter for short strings.
 
-* `[` introduces an array. Elements are delimited by commas. Elements may be quoted to escape
-   commas, with same rules as string values. Arrays are multidimensional, as described below.
+* `[` introduces an array. Elements are delimited by commas. Elements
+  may be quoted to escape commas, with same rules as string values. Arrays
+  are multidimensional, as described below.
 
-* `"` introduces an (explicit, long) string value. The string extends until the closing unescaped `"`, and may contain multiple lines.
-    Leading whitespace on each line is ignored up to the column of the first non-whitespace character on any previous line.
-    Closing whitespace on the first line is ignored, if there is no non-whitespace text following the `"`.
-    Escape sequences are supported, including `"\ "` to denote a literal
-    space character. A backslash `\` at the end of the line means to ignore the newline.
-    A newline is interpreted as the standard newline sequence on the current machine.
+* `"` introduces an (explicit, long) string value. The string extends
+  until the closing unescaped `"`, and may contain multiple lines.
 
-* Other non-reserved non-whitespace characters introduce implicit "short strings" that extend until the
-  next natural delimiter. Trailing whitespace up to the delimiter is removed.
+* Other non-reserved non-whitespace characters introduce implicit "short
+  strings" that extend until the next natural delimiter. Trailing whitespace up
+  to the delimiter is removed, as is leading whitespace.  Unquoted numbers and
+  booleans are treated as short strings.
 
 ### Comments
 
-A comment line is one whose first non-whitespace character is a number sign (`#`). Any such
-line is ignored completely. There are no inline comments: a line with a comment cannot include
-any object data.
+A comment line is one whose first non-whitespace character is a number sign
+(`#`). Any such line is ignored completely. There are no inline comments: a
+line with a comment cannot include any object data. The character # is
+otherwise treated as an ordinary character. It may also be escaped in strings
+(`\#`).
+
+### Strings
+
+Leading whitespace in long strings is handled in a better way than in most
+formats.  The leading whitespace on each line is ignored up to the column of
+the first non-whitespace character on any previous line, so long strings can
+remain indented in a visually attractive way.
+
+Closing whitespace on the first line is ignored, if there is no
+non-whitespace text following the `"`. Standard JSON escape sequences
+are supported. In addition, escape sequences like `\]` and `\ ` may
+be used to indicate that the next character, otherwise special to
+LWON, is to be taken literally.  A backslash `\` at the end of the
+line means to ignore the newline.  A newline is interpreted as the
+standard newline sequence on the current machine.
+
+### Dictionaries
+
+Dictionaries are internally an ordered list of key-value pairs, with the
+ordering as specified in the input.  Querying a dictionary key with a given key
+returns a list of associated values, in the input order. Repeated keys do not
+have to occur sequentially in the input.
+
+Empty values are allowed but must be specified as long strings: `""`.
 
 ### Arrays
 
@@ -49,7 +79,8 @@ Arrays are automatically multidimensional, with rows as the major
 dimension if there are rows. Thus, a CSV file can be interpreted
 largely as is. Double, triple, etc. newlines can be used to introduce
 even higher dimensions. Arrays have uniform dimensions: they are not
-ragged. To represent such structures, elements can be empty text.
+ragged. To represent such structures, empty text elements are created
+as missing positions.
 
 ### Natural delimiters
 
@@ -61,14 +92,16 @@ Natural delimiters depend on context.
 
 ### Reserved characters
 
-Some reserved characters cannot begin an implicit string value: `|`, `$`, `+`, `\`
+Some reserved characters may not begin a short string: `|`, `$`, `+`, `\`. However,
+they may be used inside a short string.
 
 ### Implicit outer objects:
 
 The top-level object need not be explicitly delimited; it may be
 implicitly understood to be a dictionary or array, which case the
 initial `{` or `[` is not used. CSV files can therefore be read as
-implicit top-level arrays.
+implicit top-level arrays. To have an implicit outer object, the parser
+must be told externally what to expect.
 
 ## Examples
 
@@ -101,7 +134,9 @@ Germany, 84, 3.7
 
 See the directory `tests/` for more short examples.
 
-## Building
+## Building the code
 
-The software can be built as a runnable JAR file using the command `gradle shadowJar`. The script `bin/dump` is an example using this API. It reads in a file
-as a sequence of LWON objects and prints each of them to standard output.
+A Java implementation of an LWON parser is available.  It can be built
+as a runnable JAR file using the command `gradle shadowJar`. The script
+`bin/dump` is an example using this API. It reads in a file as a
+sequence of LWON objects and prints each of them to standard output.
