@@ -58,3 +58,10 @@ shadowJar {
         attributes 'Main-Class': 'Dump'
     }
 }
+
+task generateJavadoc(type: Javadoc) {
+    source = sourceSets.main.allJava
+    classpath = sourceSets.main.compileClasspath
+    destinationDir = file("${buildDir}/docs/javadoc")
+    options.links("https://docs.oracle.com/en/java/javase/17/docs/api/");
+}

@@ -17,6 +17,8 @@ public class Parser {
         scanner = input;
     }
 
+    /** Exception meaning that the input contained a violation of LWON syntax rules.
+     */
     public static class SyntaxError extends Exception {
         SyntaxError(String msg, Location location) {
             super(location + ": " + msg);

@@ -105,10 +105,16 @@ public class Array extends DataObject implements Iterable<DataObject> {
         return Arrays.stream(data).iterator();
     }
 
+    /** A builder class for {@code Array}.
+     */
     public static class Builder {
-        public record Entry(int[] indices, DataObject value) {}
+        private record Entry(int[] indices, DataObject value) {}
         private final ArrayList<Entry> entries = new ArrayList<>();
 
+        /** Create a new builder containing no elements. */
+        public Builder() {}
+
+        /** Create an array object containing the current data in the builder. */
         public Array build(Location where) {
             int numDims = 0;
             for (Entry e : entries) {
@@ -132,10 +138,17 @@ public class Array extends DataObject implements Iterable<DataObject> {
             }
             return new Array(dimensions, data, where);
         }
+        /** Set the object located at the specified indices to {@code obj}.
+         *  If the length of {@code indices} given is less than the
+         *  dimensionality of the array, enough zeros are prepended to the index
+         *  array to equalize the dimensionality.
+         */
         public void set(int[] indices, DataObject obj) {
             entries.add(new Entry(indices.clone(), obj));
         }
 
+        /** The number of entries in the full array.
+         */
         private int size(int[] dimensions) {
             int result = 1;
             for (int s : dimensions) {
