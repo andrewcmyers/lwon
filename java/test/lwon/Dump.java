@@ -1,3 +1,5 @@
+package lwon;
+
 import easyIO.EOF;
 import easyIO.Scanner;
 import lwon.data.DataObject;
@@ -8,6 +10,9 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+/** A simple LWON demo that reads input from a file or files and outputs formatted
+ *  versions of the same data in LWON format.
+ */
 public class Dump {
     public static void main(String[] args) {
         int optind = 0;
