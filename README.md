@@ -2,18 +2,19 @@
 
 LightWeight Object Notation
 
-This is a notation for representing structured data that is intended to be even lighter-weight than JSON.
+LWON is a notation for representing structured data. LWON is intended to be even lighter-weight than JSON.
+Parsing LWON is harder than parsing JSON, but the intention is to make the data easier to read and
+maintain by hand, without special tools.
+
+Goals:
 
 - Self-descriptive without an external schema.
 - Supports strings, dictionaries, and multidimensional arrays
 - Mostly backward compatible with CSV and JSON
 - Mostly looks like JSON, but with less syntactic overhead:
     - key names do not need quoting
-    - single-line string values do not need quoting
-    - multi-line string values allowed without special escaping
-
-Parsing LWON is harder than parsing JSON, but the intention is to make the data easier to read and
-maintain by hand.
+    - single-line string values ("short strings") do not need quoting
+    - multi-line string values ("long strings") allowed without special escaping
 
 ## Syntax
 
@@ -25,8 +26,8 @@ maintain by hand.
 * `[` introduces an array. Elements are delimited by commas. Elements may be quoted to escape
    commas, with same rules as string values. Arrays are multidimensional, as described below.
 
-* `"` introduces an (explicit) string value. It extends until the closing unescaped `"`, and may contain multiple lines.
-    Leading whitespace on lines is ignored up to the column of the first non-whitespace character.
+* `"` introduces an (explicit, long) string value. The string extends until the closing unescaped `"`, and may contain multiple lines.
+    Leading whitespace on each line is ignored up to the column of the first non-whitespace character on any previous line.
     Closing whitespace on the first line is ignored, if there is no non-whitespace text following the `"`.
     Escape sequences are supported, including `"\ "` to denote a literal
     space character. A backslash `\` at the end of the line means to ignore the newline.
