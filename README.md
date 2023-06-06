@@ -15,6 +15,7 @@ Goals:
     - key names do not need quoting
     - single-line string values ("short strings") do not need quoting
     - multi-line string values ("long strings") allowed without special escaping
+    - multidimensional arrays supported directly 
 
 ## Syntax
 
