@@ -1,7 +1,5 @@
 #!/usr/bin/env perl
 
-print "$ARGV[0]\n";
-
 open(TESTS, "<tests/tests.lwon");
 
 my $tests = 0;

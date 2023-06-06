@@ -1,0 +1,4 @@
+{
+  person: { name: Jane Doe, age: 28, occupation: data scientist }
+  hobbies: [ painting, hiking ]
+}

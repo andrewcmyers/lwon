@@ -2,3 +2,6 @@
 .*.sw?
 java/.idea
 java/*.iml
+.gradle
+build
+java/out
