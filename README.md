@@ -2,9 +2,15 @@
 
 LightWeight Object Notation
 
-LWON is a notation for representing structured data. LWON is intended to feel lighter-weight than JSON.
-Parsing LWON is harder than parsing JSON, but the intention is to make the data easier to read and
-maintain by hand, without special tools. It is particularly handy as a syntax for configuration files.
+Applications commonly read configuration files. These configuration files are
+often structurally complex, leading to use of expressive standards like XML and
+JSON.  Unfortunately the syntax of these standards is cumbersome, making them
+inconvenient to work with.
+
+LWON is a lighter-weight notation for representing structured data.  Parsing
+LWON is harder than parsing JSON or XML, but the data is easier to read and
+maintain by hand, without special tools. It is particularly handy as a syntax
+for configuration files, but it can be used for other purposes.
 
 *Goals:*
 
@@ -134,9 +140,16 @@ Germany, 84, 3.7
 
 See the directory `tests/` for more short examples.
 
-## Building the code
+## Implementations
 
-A Java implementation of an LWON parser is available.  It can be built
-as a runnable JAR file using the command `gradle shadowJar`. The script
-`bin/dump` is an example using this API. It reads in a file as a
-sequence of LWON objects and prints each of them to standard output.
+Currently the only LWON implementation is in Java.
+
+### Building the code
+
+The Java implementation can be built as a runnable JAR file using the command
+`gradle shadowJar`. The script `bin/dump` is an example using this API. It
+reads in a file as a sequence of LWON objects and prints each of them to
+standard output.
+
+Javadoc documentation for the Java implementation can be found in the `docs/`
+directory or [at the web site](https://andrewcmyers.github.io/lwon/).
