@@ -14,6 +14,10 @@ import java.util.List;
  *  versions of the same data in LWON format.
  */
 public class Dump {
+
+    private Dump() {}
+
+    /** Usage: {@code dump [-a] [-d] <file> ...} */
     public static void main(String[] args) {
         int optind = 0;
         boolean dictionary = false, array = false;
