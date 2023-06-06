@@ -29,8 +29,8 @@ public class Dump {
         }
         for (int i = optind; i < args.length; i++) inputFiles.add(args[i]);
         if (inputFiles.isEmpty()) inputFiles.add("-");
-        for (String filename : inputFiles) {
-            try {
+        try {
+            for (String filename : inputFiles) {
                 Scanner scanner = filename.equals("-")
                     ? new Scanner(new InputStreamReader(System.in), "stdin")
                     : new Scanner(filename);
@@ -48,11 +48,11 @@ public class Dump {
                         break;
                     }
                 }
-            } catch (Parser.SyntaxError e) {
-                System.err.println(e.getMessage());
-            } catch (FileNotFoundException e) {
-                System.err.println("File not found: " + e.getMessage());
             }
+        } catch (Parser.SyntaxError e) {
+            System.err.println(e.getMessage());
+        } catch (FileNotFoundException e) {
+            System.err.println("File not found: " + e.getMessage());
         }
     }
 }

@@ -98,6 +98,7 @@ public class Parser {
     /** Parse an implicit dictionary data object from the scanner. Throw EOF if there is no
      *  data there and SyntaxError if there is a syntax error. */
     public DataObject parseDictionary() throws SyntaxError, EOF {
+        skipComments();
         return parseDictionary(scanner.location());
     }
 
@@ -384,6 +385,7 @@ public class Parser {
     /** Parse an implicit array data object from the scanner. Throw EOF if there is no
      *  data there and SyntaxError if there is a syntax error. */
     public DataObject parseArray() throws SyntaxError, EOF {
+        skipComments();
         return parseArray(scanner.location());
     }
     /** Parse an array from the scanner. The scanner position is required to be after
