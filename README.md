@@ -8,9 +8,9 @@ JSON.  Unfortunately the syntax of these standards is cumbersome, making them
 inconvenient to work with.
 
 LWON is a lighter-weight notation for representing structured data.  Parsing
-LWON is harder than parsing JSON or XML, but the data is easier to read and
-maintain by hand, without special tools. It is particularly handy as a syntax
-for configuration files, but it can be used for other purposes.
+LWON is somewhat more complex than parsing JSON or XML, but the data is easier
+to read and maintain by hand, without special tools. It is particularly handy
+as a syntax for configuration files, but it can be used for other purposes.
 
 *Goals:*
 
@@ -26,6 +26,37 @@ for configuration files, but it can be used for other purposes.
     - single-line string values ("short strings") do not need quoting.
     - multi-line string values ("long strings") are allowed without special escaping.
     - multidimensional arrays are supported directly.
+
+## Examples
+
+Personal information as a dictionary:
+```
+{
+  hair: brown
+  eyes: blue
+  height: 69
+  friends: [ alice, bob ]
+  state: New Mexico
+  # Note: No leading whitespace in the second line of the credo.
+  credo: "Do unto others as you
+          would have them do unto you."
+  # Note: values can be complex data with nested arrays and dictionaries.
+  pets [ { name: fido, species: dog },
+         { name: tom, species: cat } ]
+}
+```
+
+A 2-D array (implicit outer object):
+```
+# Header row follows (not special in LWON)
+Country, Population, GDP
+# Now, some data
+USA, 338, 23.3
+China, 1411, 12.2
+Germany, 84, 3.7
+```
+
+See the directory `tests/` for more short examples.
 
 ## Syntax
 
@@ -109,40 +140,10 @@ initial `{` or `[` is not used. CSV files can therefore be read as
 implicit top-level arrays. To have an implicit outer object, the parser
 must be told externally what to expect.
 
-## Examples
-
-Personal information as a dictionary:
-```
-{
-  hair: brown
-  eyes: blue
-  height: 69
-  friends: [ alice, bob ]
-  state: New Mexico
-  # Note: No leading whitespace in the second line of the credo.
-  credo: "Do unto others as you
-          would have them do unto you."
-  # Note: values can be complex data with nested arrays and dictionaries.
-  pets [ { name: fido, species: dog },
-         { name: tom, species: cat } ]
-}
-```
-
-A 2-D array (implicit outer object):
-```
-# Header row follows (not special in LWON)
-Country, Population, GDP
-# Now, some data
-USA, 338, 23.3
-China, 1411, 12.2
-Germany, 84, 3.7
-```
-
-See the directory `tests/` for more short examples.
-
 ## Implementations
 
-Currently the only LWON implementation is in Java.
+Currently the only LWON implementation is in Java. With luck, implementations
+for more language will be provided by other authors.
 
 ### Building the code
 
