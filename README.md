@@ -37,6 +37,7 @@ Personal information as a dictionary:
   height: 69
   friends: [ alice, bob ]
   state: New Mexico
+  local address: 742 Evergreen Terrace, Springfield
   # Note: No leading whitespace in the second line of the credo.
   credo: "Do unto others as you
           would have them do unto you."
@@ -88,12 +89,19 @@ otherwise treated as an ordinary character. It may also be escaped in strings
 
 ### Strings
 
-Leading whitespace in long strings is handled in a better way than in most
-formats.  The leading whitespace on each line is ignored up to the column of
-the first non-whitespace character on any previous line, so long strings can
+Short strings are not surrounded by quotation marks, and they must be on a
+single line.  Some reserved characters may not begin a short string. In
+addition to the above special characters, reserved characters include `|`, `$`,
+`+`, `\`. However, these characters may be used inside a short string.
+Whitespace other than newlines may also occur inside a short string.
+
+Long strings begin with a double quotation mark (`"`). They may span multiple
+lines. Leading whitespace in long strings is handled in a better way than in
+most formats.  The leading whitespace on each line is ignored up to the column
+of the first non-whitespace character on any previous line, so long strings can
 remain indented in a visually attractive way.
 
-Closing whitespace on the first line is ignored, if there is no
+For long strings, closing whitespace on the first line is ignored, if there is no
 non-whitespace text following the `"`. Standard JSON escape sequences
 are supported. In addition, escape sequences like `\]` and `\ ` may
 be used to indicate that the next character, otherwise special to
@@ -104,9 +112,11 @@ standard newline sequence on the current machine.
 ### Dictionaries
 
 Dictionaries are internally an ordered list of key-value pairs, with the
-ordering as specified in the input.  Querying a dictionary key with a given key
-returns a list of associated values, in the input order. Repeated keys do not
-have to occur sequentially in the input.
+ordering as specified in the input. Keys may be any value, not just identifiers.
+
+Querying a dictionary key with a given key returns a list of associated values,
+in the input order. Repeated keys do not have to occur sequentially in the
+input.
 
 Empty values are allowed but must be specified as long strings: `""`.
 
@@ -126,11 +136,6 @@ Natural delimiters depend on context.
   to have a newline delimiter. 
 - For dictionary values, it is a newline or closing brace.
 - For array elements, it is a comma, closing bracket (`]`), or newline.
-
-### Reserved characters
-
-Some reserved characters may not begin a short string: `|`, `$`, `+`, `\`. However,
-they may be used inside a short string.
 
 ### Implicit outer objects:
 
