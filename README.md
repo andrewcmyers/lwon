@@ -61,6 +61,9 @@ See the directory `tests/` for more short examples.
 
 ## Syntax
 
+Although all the mandated syntax sticks to ASCII, LWON input is a sequence of
+Unicode characters, normally using UTF-8 encoding.
+
 * `{` introduces a dictionary, which is a sequence of key-value pairs,
   where keys are string values. Keys may be repeated. Keys may be
   separated from values by a colon (`:`). Key/value pairs may optionally
@@ -159,3 +162,41 @@ standard output.
 
 Javadoc documentation for the Java implementation can be found in the `docs/`
 directory or [at the web site](https://andrewcmyers.github.io/lwon/).
+
+
+## Contributing to LWON
+
+There are many things that could be done to improve this project, and help from
+outside collaborators is welcome.
+
+- More thorough testing would be good.
+   * especially, negative test cases should be added
+   * Also, testing should be set up as a Github action.
+
+- Currently the focus is on reading information from external user input. Outputting
+  data in human-readable format is also useful if one wants to use LWON as a data store
+  for an application. The current output format is verbose and does not preserve
+  comments and stylistic choices from the original input. What is wanted is a
+  lens "put" operation that converts data objects back to LWON while using the
+  original input to provide the missing information.
+
+- LWON data objects actually have *two* other layers to synchronize: not just the
+  human-readable data it is parsed from and unparsed to, but also, for many applications,
+  application data representations that are more convenient for expressing application
+  business logic. Support for all of the arrows in the following diagram would be very
+  powerful!
+
+```
+diagram:                                 app-specific "get"
+                    parser                  translation
+  human-readable  ------→  LWON data object -----→ application data rep
+  UTF-8 data  \                  |         \____           |
+        |      \___              |              \          | application
+external|          \             | LWON update←-Є----------Є-business
+editing |           ↓            | operations   |          | logic
+        ↓         unparse        ↓              |          ↓
+  updated human   ←------- updated LWON data ←--↓-- updated app data
+  readable data                          app-specific "put"
+                                            translation
+
+```
