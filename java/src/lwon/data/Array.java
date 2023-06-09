@@ -68,6 +68,11 @@ public class Array extends DataObject implements Iterable<DataObject> {
         int[] indices = new int[dimensions.length];
         b.append("[");
         b.append(System.lineSeparator());
+        if (indices.length == 1 && dimensions[0] == 0) {
+            b.append("  ".repeat(indent));
+            b.append("]");
+            return;
+        }
         boolean first = true;
         for (;;) {
             if (first) {
@@ -127,6 +132,10 @@ public class Array extends DataObject implements Iterable<DataObject> {
                 for (int i = 0; i < d; i++) {
                     dimensions[i + offset] = Math.max(dimensions[i + offset], e.indices[i] + 1);
                 }
+            }
+            if (numDims == 0) {
+                numDims = 1;
+                dimensions = new int[]{entries.size()};
             }
             DataObject[] data = new DataObject[size(dimensions)];
             DataObject dummy = new Text("", where);
