@@ -1,4 +1,14 @@
 #!/bin/bash
 
-java -jar build/libs/lwon.jar $*
+file=`realpath $0`
+dir=`dirname $file`
+jar="${dir}/../build/libs/lwon.jar"
+
+if [[ ! -r "${jar}" ]]
+then
+    echo "Cannot find JAR file ${jar}"
+    exit 2
+fi
+
+java -jar "${jar}" $*
 exit $?

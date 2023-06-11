@@ -1,3 +1,9 @@
 [submodule "java/easyIO"]
 	path = java/easyIO
 	url = git@github.com:andrewcmyers/easyIO.git
+[submodule "maybe"]
+	path = maybe
+	url = git@github.com:andrewcmyers/maybe.git
+[submodule "java/maybe"]
+	path = java/maybe
+	url = git@github.com:andrewcmyers/maybe.git
