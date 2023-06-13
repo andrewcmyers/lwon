@@ -35,7 +35,7 @@ Personal information as a dictionary:
   hair: brown
   eyes: blue
   height: 69
-  friends: [ alice, bob ]
+  close friends: [ alice, bob ]
   state: New Mexico
   local address: 742 Evergreen Terrace, Springfield
   # Note: No leading whitespace in the second line of the credo.
@@ -65,7 +65,7 @@ Although all the mandated syntax sticks to ASCII, LWON input is a sequence of
 Unicode characters, normally using UTF-8 encoding.
 
 * `{` introduces a dictionary, which is a sequence of key-value pairs,
-  where keys are string values. Keys may be repeated. Keys may be
+  where keys are typically strings. Keys may be repeated. Keys may be
   separated from values by a colon (`:`). Key/value pairs may optionally
   be separated by commas, but note that commas are not a natural
   delimiter for short strings.
@@ -79,7 +79,8 @@ Unicode characters, normally using UTF-8 encoding.
 
 * Other non-reserved non-whitespace characters introduce implicit "short
   strings" that extend until the next natural delimiter. Trailing whitespace up
-  to the delimiter is removed, as is leading whitespace.  Unquoted numbers and
+  to the delimiter is removed, as is leading whitespace, but short strings
+  may contain non-delimiter whitespace characters. Unquoted numbers and
   booleans are treated as short strings.
 
 ### Comments
@@ -115,7 +116,8 @@ standard newline sequence on the current machine.
 ### Dictionaries
 
 Dictionaries are internally an ordered list of key-value pairs, with the
-ordering as specified in the input. Keys may be any value, not just identifiers.
+ordering as specified in the input. Keys may be any value, not just identifiers,
+and string keys may contain whitespace.
 
 Querying a dictionary key with a given key returns a list of associated values,
 in the input order. Repeated keys do not have to occur sequentially in the
