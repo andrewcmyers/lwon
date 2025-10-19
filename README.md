@@ -192,7 +192,7 @@ outside collaborators is welcome.
   powerful!
 
 ```
-diagram:                             app-specific "get"
+                                     app-specific "get"
                     parser               translation
   human-readable  ------→  LWON data object -----→ application data rep
   UTF-8 data  \                  |         \____           |
