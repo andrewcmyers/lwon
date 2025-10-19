@@ -26,6 +26,9 @@ as a syntax for configuration files, but it can be used for other purposes.
     - single-line string values ("short strings") do not need quoting.
     - multi-line string values ("long strings") are allowed without special escaping.
     - multidimensional arrays are supported directly.
+    
+ - Similar in spirit to YAML but cleans up string and multiline syntax, and supports
+   multidimensional CSV-like arrays.
 
 ## Examples
 
