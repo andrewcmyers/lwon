@@ -287,7 +287,7 @@ impl Parser {
                     }
                     b.push(self.s.next()?);
                 }
-                ' ' => {
+                ' ' | '\t' => {
                     let c = self.s.next()?;
                     if multiline { b.push(c) } else { ws.push(c) }
                 }

@@ -196,7 +196,7 @@ class Parser:
                         b.append(s.next())
                     else:
                         return ''.join(b)
-                elif ch == ' ':
+                elif ch in BLANKS:
                     if multiline:
                         b.append(s.next())
                     else:

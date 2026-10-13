@@ -247,6 +247,7 @@ public class Parser {
                       }
                       break;
                   case ' ':
+                  case '\t':
                       if (multiline) {
                           b.append(Character.toChars(scanner.next()));
                       } else {
