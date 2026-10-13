@@ -1,6 +1,7 @@
 package lwon.parse;
 
 import easyIO.EOF;
+import easyIO.LineTerminators;
 import easyIO.Scanner;
 import easyIO.BacktrackScanner.Location;
 import easyIO.UnexpectedInput;
@@ -13,9 +14,13 @@ import org.apache.commons.text.StringEscapeUtils;
 public class Parser {
     private Scanner scanner;
 
-    /** Create a Parser reading from the specified input. */
+    /** Create a Parser reading from the specified input, which is set to accept
+     *  all LWON line terminators.
+     *  Requires: no input has been read from input.
+     */
     public Parser(Scanner input) {
         scanner = input;
+        scanner.setLineTerminators(LineTerminators.LF_CRLF_CR);
     }
 
     /** Exception meaning that the input contained a violation of LWON syntax rules.
@@ -96,6 +101,15 @@ public class Parser {
         }
     }
 
+    /** Throw SyntaxError if the next character is the closing character
+     *  {@code closing}, which has no matching opening character.
+     */
+    private void rejectUnmatched(char closing) throws SyntaxError, EOF {
+        if (scanner.peek() == closing) {
+            throw new SyntaxError("Unmatched " + unparseChar(closing), scanner.location());
+        }
+    }
+
     private String unparseChar(int c) {
         return StringEscapeUtils.escapeJava(Character.toString(c));
     }
@@ -108,7 +122,9 @@ public class Parser {
      *  data there and SyntaxError if there is a syntax error. */
     public DataObject parseDictionary() throws SyntaxError, EOF {
         skipComments();
-        return parseDictionary(scanner.location());
+        Dictionary result = parseDictionary(scanner.location());
+        rejectUnmatched('}');
+        return result;
     }
 
     /** Parse a dictionary from the scanner. The scanner position is required to be after
@@ -124,7 +140,7 @@ public class Parser {
                 if (scanner.peek() == '}' || scanner.peek() == -1) break;
                 here = scanner.location();
                 String key = parseKey(scanner.location());
-                if (scanner.peek() == '\n') {
+                if (isNewline(scanner.peek())) {
                     throw new SyntaxError("keys must have a non-newline delimiter",  here);
                 }
                 if (scanner.peek() == ':')  {
@@ -167,9 +183,9 @@ public class Parser {
           if (multiline) {
               scanner.mark();
               skipBlanks();
-              if (scanner.peek() == '\n') {
+              if (isNewline(scanner.peek())) {
                   scanner.accept();
-                  scanner.next();
+                  newline();
                   leftColumn = skipLeadingSpace(leftColumn);
               } else {
                   scanner.abort();
@@ -240,16 +256,11 @@ public class Parser {
                       break;
                   case '\r':
                   case '\n':
-                      try {
-                          if (!multiline) return new Text(b.toString(), start);
-                          scanner.newline();
-                          skipComments();
-                          b.append(System.lineSeparator());
-                          leftColumn = skipLeadingSpace(leftColumn);
-                      } catch (UnexpectedInput e) {
-                          // not a line separator (e.g., a lone \r): keep it as ordinary text
-                          b.append(scanner.next());
-                      }
+                      if (!multiline) return new Text(b.toString(), start);
+                      newline();
+                      skipComments();
+                      b.append(System.lineSeparator());
+                      leftColumn = skipLeadingSpace(leftColumn);
                       break;
                   default:
                       if (!multiline && -1 != delimiters.indexOf(ch)) {
@@ -268,8 +279,8 @@ public class Parser {
       }
     }
 
-    private static final String blanks = " \t\r";
-    private static final String lineTerminators = "\n\f";
+    private static final String blanks = " \t";
+    private static final String lineTerminators = "\n\r\f";
     private static final String whitespace = blanks + lineTerminators;
 
     /**
@@ -287,14 +298,16 @@ public class Parser {
                         scanner.abort();
                         throw new EOF();
                     case '\n':
+                    case '\r':
                         scanner.abort(); // blank line
                         return;
                     case '#':
                         scanner.accept();
-                        scanner.next();
-                        while (-1 == lineTerminators.indexOf(ch)) {
-                            ch = scanner.next();
+                        while (scanner.hasNext() && -1 == lineTerminators.indexOf(scanner.peek())) {
+                            scanner.next();
                         }
+                        if (!scanner.hasNext()) throw new EOF();
+                        if (!newline()) scanner.next(); // form feed
                         break charloop;
                     default:
                         if (-1 != blanks.indexOf(ch)) {
@@ -361,9 +374,28 @@ public class Parser {
             case ']': return "]";
             case '#': return "#";
             case ':': return ":";
+            case '\r':
+                if (scanner.peek() == '\n') scanner.next();
+                return "";
             case '\n': return "";
             default:
                 throw new SyntaxError("Illegal escape sequence", where);
+        }
+    }
+
+    /** Whether ch is the first character of a line break: \n, \r\n, or \r. */
+    private static boolean isNewline(int ch) {
+        return ch == '\n' || ch == '\r';
+    }
+
+    /** If the input is at a line break (\n, \r\n, or \r), consume it and return true.
+     *  Otherwise, return false. */
+    private boolean newline() {
+        try {
+            scanner.newline();
+            return true;
+        } catch (UnexpectedInput exc) {
+            return false;
         }
     }
 
@@ -381,7 +413,11 @@ public class Parser {
     public void skipWhitespace() {
         try {
             while (scanner.hasNext() && -1 != whitespace.indexOf(scanner.peek())) {
-                if (scanner.next() == '\n') skipComments();
+                if (newline()) {
+                    skipComments();
+                } else {
+                    scanner.next();
+                }
             }
         } catch (EOF exc) {
             // nothing left
@@ -392,7 +428,9 @@ public class Parser {
      *  data there and SyntaxError if there is a syntax error. */
     public DataObject parseArray() throws SyntaxError, EOF {
         skipComments();
-        return parseArray(scanner.location());
+        Array result = parseArray(scanner.location());
+        rejectUnmatched(']');
+        return result;
     }
     /** Parse an array from the scanner. The scanner position is required to be after
      *  the opening bracket and on either a real character of array content or the
@@ -431,11 +469,11 @@ public class Parser {
                         try {
                             for (;;) {
                                 here = scanner.location();
-                                scanner.newline();
+                                if (!newline()) break;
                                 skipComments();
                                 dimout++;
                             }
-                        } catch (UnexpectedInput|EOF exc) {
+                        } catch (EOF exc) {
                             // done
                         }
                         int index = indices.length - 1 - dimout;
