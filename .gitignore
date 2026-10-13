@@ -5,3 +5,6 @@ java/*.iml
 .gradle
 build
 java/out
+__pycache__
+*.egg-info
+dist

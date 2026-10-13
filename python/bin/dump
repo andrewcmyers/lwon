@@ -1,0 +1,4 @@
+#!/bin/sh
+# Run the Python LWON implementation's dump program; see python/lwon/__main__.py.
+dir=`dirname "$0"`
+PYTHONPATH="$dir/.." exec python3 -m lwon "$@"

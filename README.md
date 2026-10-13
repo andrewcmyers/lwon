@@ -128,12 +128,11 @@ interpreted as the standard newline sequence on the current machine.
 ### Dictionaries
 
 Dictionaries are internally an ordered list of key-value pairs, with
-the ordering as specified in the input. Keys may be any value, not
-just identifiers, and string keys may contain whitespace.
+the ordering specified in the input. Keys may be any string value,
+not just identifiers, and may contain whitespace.
 
-Querying a dictionary key with a given key returns a list of
-associated values, in the input order. Repeated keys do not have to
-occur sequentially in the input.
+Keys may be repeated, and all values associated with a given key are
+kept. Repeated keys do not have to occur consecutively in the input.
 
 Empty values are allowed but must be specified as long strings: `""`.
 
@@ -144,7 +143,7 @@ dimension if there are rows. Thus, a CSV file can be interpreted
 largely as is. Double, triple, etc. newlines can be used to introduce
 even higher dimensions. Arrays have uniform dimensions: they are not
 ragged. To represent such structures, empty text elements are created
-as missing positions.
+for missing positions.
 
 ### Natural delimiters
 
@@ -183,10 +182,9 @@ unquoted fields are read as short strings:
 
 ## Implementations
 
-Currently the only LWON implementation is in Java. With luck,
-implementations for more language will be provided by other authors.
+Currently there are two LWON implementations: Java and Python.
 
-### Building the code
+### Java Implementation
 
 The Java implementation can be built as a runnable JAR file using the
 command `gradle shadowJar`. The script `bin/dump` is an example using
@@ -197,6 +195,65 @@ Javadoc documentation for the Java implementation
 can be found in the `docs/` directory or [at the web
 site](https://andrewcmyers.github.io/lwon/).
 
+Java test cases can be run using `gradlew test`.
+
+### Python implementation
+
+The Python implementation was ported from the Java implementation.
+It is in the `python/` directory, requires Python 3.9 or later, and
+uses only the standard library. Install it with
+`pip install ./python` (or, with pip 21.3 or later,
+`pip install -e ./python` to use the source in place), or add
+`python/` to `PYTHONPATH`. Its interface resembles that of the
+standard `json` module:
+
+```python
+import lwon
+
+value = lwon.loads(text)                     # a single LWON value
+table = lwon.loads(text, implicit="array")   # an implicit array, e.g., CSV
+config = lwon.loads(text, implicit="dict")   # an implicit dictionary
+for value in lwon.loads_all(text):           # a sequence of LWON values
+    ...
+with open("data.lwon", encoding="utf-8", newline="") as f:
+    value = lwon.load(f)                     # also lwon.load_all(f)
+print(lwon.dumps(value))                     # also lwon.dump(value, f)
+```
+
+Open files with `newline=""` so that line terminators reach the parser
+unchanged. Invalid input raises `lwon.LWONSyntaxError`, whose message
+begins with the location of the error.
+
+LWON values are represented by built-in types and subclasses of them:
+
+- Text is a `str`.
+- A one-dimensional array is a `list`. Its elements may themselves be
+  arrays.
+- An array of two or more dimensions is an `lwon.Grid`, a `list` of
+  nested lists with the first dimension outermost, and with its number of
+  dimensions in its `ndim` attribute. For example, the rows `a, b` and
+  `c, d` become `[["a", "b"], ["c", "d"]]`. To write nested lists as a
+  multidimensional array rather than as an array of arrays, wrap them in
+  a `Grid`: `lwon.Grid(rows)`.
+- A dictionary is an `lwon.Dictionary`, a `dict` mapping each key to the
+  list of its values, so that `{name: Alice}` becomes
+  `{"name": ["Alice"]}`. It also records the order of all its entries,
+  which its `entries()` method yields as (key, value) pairs.
+
+When keys are not repeated, `lwon.flatten(value)` converts every
+dictionary in `value` to a `dict` mapping each key to its single value,
+raising `ValueError` if a key has more than one. Its `reduce` parameter
+specifies how to combine multiple values instead, for example
+`lwon.flatten(value, reduce=lambda values: values[-1])` to keep the last.
+
+The command `lwon-dump [-a] [-d] file...`, installed by `pip`, works
+like `bin/dump`; so do `python3 -m lwon` and, without installation,
+`python/bin/dump`.
+
+Python tests can be run using `bin/run-tests python/bin/dump` (the
+shared tests in `tests/`) and
+`cd python && python3 -m unittest discover -s tests`. 
+
 ## Contributing to LWON
 
 Many things could be done to improve this project, and help from
@@ -205,7 +262,7 @@ outside collaborators is welcome.
 - More thorough testing would be good.
    * Also, testing should be set up as a Github action.
 
-- Implementations for other languages like Python, JavaScript, Rust,
+- Implementations for other languages like JavaScript, Rust,
   or C++ would be a welcome addition.
 
 - Currently the focus is on reading information from external user

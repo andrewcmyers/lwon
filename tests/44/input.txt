@@ -1,0 +1,13 @@
+tag: red
+name: Alice
+tag: blue
+"tag": green
+other: x
+"": one
+"": two
+nested: {
+  k: 1
+  j: 2
+  k: 3
+}
+name: Bob

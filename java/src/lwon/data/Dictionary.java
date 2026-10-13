@@ -48,10 +48,12 @@ public class Dictionary extends DataObject {
         }
     }
 
-    /** Exception meaning that a key was not found. This is a fast exception
-     *  that does not support debugging. */
-    public static class NotFound extends Exception {
-        @Override public NotFound fillInStackTrace() { return this; }
+    /** A list of all values associated with this key, in the order in which
+     *  they appeared in the input.
+     */
+    public List<DataObject> get(Object key) {
+        List<DataObject> o = mapping.get(key);
+        return o == null ? List.of() : o;
     }
 
     /** A list of all values associated with this key, in the order in which
