@@ -144,7 +144,14 @@ public class Parser {
         }
     }
 
-    private String parseKey(Location start) throws SyntaxError {
+    private String parseKey(Location start) throws SyntaxError, EOF {
+        if (scanner.peek() == '"') {
+            Location first = expect('"');
+            Text t = parseText(true, ":", first);
+            expect('"');
+            skipBlanks();
+            return t.value();
+        }
         Text t = parseText(false, ":", start);
         return t.value();
     }

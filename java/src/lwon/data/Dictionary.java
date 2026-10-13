@@ -1,6 +1,7 @@
 package lwon.data;
 
 import easyIO.BacktrackScanner.Location;
+import org.apache.commons.text.StringEscapeUtils;
 
 import java.util.*;
 
@@ -92,6 +93,30 @@ public class Dictionary extends DataObject {
         return b.toString();
     }
 
+    /** Characters that may not begin an unquoted key. */
+    private static final String reservedStart = "{}[]:\"|$+\\#";
+    /** Characters that may not appear anywhere in an unquoted key. */
+    private static final String reservedAnywhere = "{}[]:\"\\";
+
+    /** Whether the key must be written as a quoted string to be read back unchanged. */
+    private static boolean needsQuotes(String key) {
+        if (key.isEmpty()) return true;
+        if (Character.isWhitespace(key.charAt(0))
+            || Character.isWhitespace(key.charAt(key.length() - 1))) return true;
+        if (-1 != reservedStart.indexOf(key.charAt(0))) return true;
+        return key.chars().anyMatch(c -> -1 != reservedAnywhere.indexOf(c) || Character.isISOControl(c));
+    }
+
+    private static void unparseKey(StringBuilder b, String key) {
+        if (needsQuotes(key)) {
+            b.append("\"");
+            b.append(StringEscapeUtils.escapeJson(key));
+            b.append("\"");
+        } else {
+            b.append(key);
+        }
+    }
+
     @Override
     public void unparse(StringBuilder b, int indent) {
         b.append("{");
@@ -103,7 +128,7 @@ public class Dictionary extends DataObject {
             first = false;
             b.append(System.lineSeparator());
             b.append("  ".repeat(indent + 1));
-            b.append(e.key);
+            unparseKey(b, e.key);
             b.append(": ");
             e.value.unparse(b, indent + 1);
         }
