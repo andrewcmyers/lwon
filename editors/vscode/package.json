@@ -1,0 +1,32 @@
+{
+  "name": "lwon",
+  "displayName": "LWON",
+  "description": "Syntax highlighting for LWON (Light-Weight Object Notation)",
+  "version": "0.1.0",
+  "publisher": "andrewcmyers",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/andrewcmyers/lwon"
+  },
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": ["Programming Languages"],
+  "contributes": {
+    "languages": [
+      {
+        "id": "lwon",
+        "aliases": ["LWON", "lwon"],
+        "extensions": [".lwon"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "lwon",
+        "scopeName": "source.lwon",
+        "path": "./syntaxes/lwon.tmLanguage.json"
+      }
+    ]
+  }
+}

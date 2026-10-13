@@ -1,0 +1,121 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "LWON",
+  "scopeName": "source.lwon",
+  "fileTypes": ["lwon"],
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#key" },
+    { "include": "#value" },
+    { "include": "#separator" }
+  ],
+  "repository": {
+    "comment": {
+      "match": "^\\s*(#).*$",
+      "name": "comment.line.number-sign.lwon",
+      "captures": {
+        "1": { "name": "punctuation.definition.comment.lwon" }
+      }
+    },
+    "key": {
+      "patterns": [
+        {
+          "match": "(\")((?:[^\"\\\\]|\\\\.|\"\")*)(\")\\s*(:)",
+          "captures": {
+            "1": { "name": "punctuation.definition.string.begin.lwon" },
+            "2": { "name": "support.type.property-name.lwon" },
+            "3": { "name": "punctuation.definition.string.end.lwon" },
+            "4": { "name": "punctuation.separator.key-value.lwon" }
+          }
+        },
+        {
+          "match": "(?:^|(?<=[{,]))\\s*((?:[^\\s{}\\[\\]:\",\\\\]|\\\\.)(?:[^{}\\[\\]:\"\\n\\\\]|\\\\.)*?)(?:\\s*(:)|(?=\\s+[\\[{\"]))",
+          "captures": {
+            "1": { "name": "support.type.property-name.lwon" },
+            "2": { "name": "punctuation.separator.key-value.lwon" }
+          }
+        }
+      ]
+    },
+    "value": {
+      "patterns": [
+        { "include": "#dictionary" },
+        { "include": "#array" },
+        { "include": "#string" },
+        { "include": "#short-string" }
+      ]
+    },
+    "dictionary": {
+      "name": "meta.structure.dictionary.lwon",
+      "begin": "\\{",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.dictionary.begin.lwon" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.dictionary.end.lwon" }
+      },
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#key" },
+        { "include": "#value" },
+        { "include": "#separator" }
+      ]
+    },
+    "array": {
+      "name": "meta.structure.array.lwon",
+      "begin": "\\[",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.array.begin.lwon" }
+      },
+      "end": "\\]",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.array.end.lwon" }
+      },
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#value" },
+        { "include": "#separator" }
+      ]
+    },
+    "string": {
+      "name": "string.quoted.double.lwon",
+      "begin": "\"",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.string.begin.lwon" }
+      },
+      "end": "\"",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.string.end.lwon" }
+      },
+      "applyEndPatternLast": 1,
+      "patterns": [
+        { "include": "#comment" },
+        { "match": "\"\"", "name": "constant.character.escape.lwon" },
+        { "include": "#escape" }
+      ]
+    },
+    "escape": {
+      "patterns": [
+        {
+          "match": "\\\\(?:u\\{[0-9A-Fa-f]{1,6}\\}|u[0-9A-Fa-f]{4}|[rnfbt\\\\/\"' }\\]#:]|$)",
+          "name": "constant.character.escape.lwon"
+        },
+        {
+          "match": "\\\\.",
+          "name": "invalid.illegal.unrecognized-escape.lwon"
+        }
+      ]
+    },
+    "short-string": {
+      "match": "(?:[^\\s{}\\[\\]:,\"\\\\]|\\\\.)(?:[^{}\\[\\],\\n\\\\]|\\\\.)*",
+      "name": "string.unquoted.lwon"
+    },
+    "separator": {
+      "patterns": [
+        { "match": ":", "name": "punctuation.separator.key-value.lwon" },
+        { "match": ",", "name": "punctuation.separator.lwon" }
+      ]
+    }
+  }
+}

@@ -1,0 +1,74 @@
+# SYNTAX TEST "source.lwon" "LWON syntax highlighting"
+
+# A comment line
+# <- comment.line.number-sign.lwon punctuation.definition.comment.lwon
+#   ^^^^^^^ comment.line.number-sign.lwon
+
+name: Alice Smith
+# <---- support.type.property-name.lwon
+#   ^ punctuation.separator.key-value.lwon
+#     ^^^^^^^^^^^ string.unquoted.lwon
+
+two words: 2
+# <--------- support.type.property-name.lwon
+
+"a:b": x
+# <- punctuation.definition.string.begin.lwon
+#^^^ support.type.property-name.lwon
+#    ^ punctuation.separator.key-value.lwon
+
+{a: [1, 2], b: "x""y\n\q"}
+# <- punctuation.definition.dictionary.begin.lwon
+#^ support.type.property-name.lwon
+#   ^ punctuation.definition.array.begin.lwon
+#    ^ string.unquoted.lwon
+#     ^ punctuation.separator.lwon
+#        ^ punctuation.definition.array.end.lwon
+#           ^ support.type.property-name.lwon
+#              ^ punctuation.definition.string.begin.lwon
+#               ^ string.quoted.double.lwon
+#                ^^ constant.character.escape.lwon
+#                   ^^ constant.character.escape.lwon
+#                     ^^ invalid.illegal.unrecognized-escape.lwon
+#                       ^ punctuation.definition.string.end.lwon
+#                        ^ punctuation.definition.dictionary.end.lwon
+
+notes: "first line
+  # a comment inside a long string
+# ^ comment.line.number-sign.lwon
+  second line \u0041 \u{1F600}"
+# ^^^^^^ string.quoted.double.lwon
+#             ^^^^^^ constant.character.escape.lwon
+#                    ^^^^^^^^^ constant.character.escape.lwon
+#                             ^ punctuation.definition.string.end.lwon
+
+url: http://example.com/a#b
+#    ^^^^^^^^^^^^^^^^^^^^^^ string.unquoted.lwon
+
+[
+  "x, y", z
+# ^^^^^^ string.quoted.double.lwon
+#       ^ punctuation.separator.lwon
+#         ^ string.unquoted.lwon
+  c, d
+# ^ string.unquoted.lwon
+]
+# <- punctuation.definition.array.end.lwon
+
+empty: ""
+#      ^ punctuation.definition.string.begin.lwon
+#       ^ punctuation.definition.string.end.lwon
+after: 1
+# <----- support.type.property-name.lwon
+
+friends [ alice, bob ]
+# <------- support.type.property-name.lwon
+#       ^ punctuation.definition.array.begin.lwon
+#         ^^^^^ string.unquoted.lwon
+address { city: Ithaca }
+# <------- support.type.property-name.lwon
+#       ^ punctuation.definition.dictionary.begin.lwon
+#         ^^^^ support.type.property-name.lwon
+nickname "Al"
+# <-------- support.type.property-name.lwon
+#        ^ punctuation.definition.string.begin.lwon
