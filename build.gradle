@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id 'application'
-    id 'com.github.johnrengelman.shadow' version '7.1.1'
+    id 'com.gradleup.shadow' version '9.6.1'
 }
 
 repositories {
@@ -14,15 +14,16 @@ dependencies {
 }
 
 // Main class configuration
-mainClassName = 'lwon.Dump'
+application {
+    mainClass = 'lwon.Dump'
+}
 
-// Set up jar task
-jar {
-    dependsOn compileJava
+// Set up jar task; classifier keeps it from colliding with the shadow jar (lwon.jar)
+tasks.named('jar') {
+    archiveClassifier = 'plain'
     manifest {
-        attributes 'Main-Class': mainClassName
+        attributes 'Main-Class': application.mainClass
     }
-    from sourceSets.main.output
 }
 
 // Include all source directories
@@ -35,7 +36,7 @@ sourceSets {
 }
 
 // Enable preview features
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.compilerArgs += ["--enable-preview"]
 }
 
@@ -45,23 +46,22 @@ java {
     }
 }
 
-task updateSubmodules(type: Exec) {
+def updateSubmodules = tasks.register('updateSubmodules', Exec) {
     commandLine 'git', 'submodule', 'update', '--init'
 }
 
-compileJava.dependsOn updateSubmodules
-
-shadowJar {
-    archiveBaseName.set('lwon')
-    archiveClassifier.set('')
-    manifest {
-        attributes 'Main-Class': 'Dump'
-    }
+tasks.named('compileJava') {
+    dependsOn updateSubmodules
 }
 
-task generateJavadoc(type: Javadoc) {
+tasks.named('shadowJar') {
+    archiveBaseName = 'lwon'
+    archiveClassifier = ''
+}
+
+tasks.register('generateJavadoc', Javadoc) {
     source = sourceSets.main.allJava
     classpath = sourceSets.main.compileClasspath
-    destinationDir = file("${buildDir}/docs/javadoc")
-    options.links("https://docs.oracle.com/en/java/javase/17/docs/api/");
+    destinationDir = layout.buildDirectory.dir('docs/javadoc').get().asFile
+    options.links("https://docs.oracle.com/en/java/javase/21/docs/api/")
 }
