@@ -167,6 +167,8 @@ public class Parser {
               int ch = scanner.peek();
               switch (ch) {
                   case -1:
+                      // end of input is a natural delimiter for short strings
+                      if (!multiline) return new Text(b.toString(), start);
                       throw new SyntaxError(UNEXPECTED_EOF, start);
                   case '\\':
                       if (!multiline && !ws.isEmpty()) {
@@ -212,6 +214,7 @@ public class Parser {
                               return new Text(b.toString(), start);
                           }
                       }
+                      break;
                   case ' ':
                       if (multiline) {
                           b.append(Character.toChars(scanner.next()));
