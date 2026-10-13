@@ -1,6 +1,10 @@
 #!/usr/bin/env perl
 
-open(TESTS, "<tests/tests.lwon");
+# Usage: run-tests [dump-command]
+# The dump command defaults to bin/dump (the Java implementation).
+my $dump = shift // "bin/dump";
+
+open(TESTS, "<tests/tests.lwon") or die "Cannot open tests/tests.lwon: $!\n";
 
 my $tests = 0;
 my $success = 0;
@@ -17,7 +21,7 @@ while (<TESTS>) {
         print "Not found: $input\n";
     }
     my $tmpfile = "/tmp/lwon.tmp.$$";
-    if ( 0 == system("bin/dump $options $dir/input.txt > $tmpfile")) {
+    if ( 0 == system("$dump $options $dir/input.txt > $tmpfile")) {
         if (0 == system("diff -u $dir/output.txt $tmpfile")) {
             $success++;
         } else {
@@ -29,8 +33,11 @@ while (<TESTS>) {
 
 }
 
+unlink "/tmp/lwon.tmp.$$";
+
 print "$success out of $tests tests succeeded.\n";
 
 if ($success < $tests) {
     print "failed tests: ", (join ", ", @failed), "\n";
+    exit 1;
 }

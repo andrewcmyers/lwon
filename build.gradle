@@ -59,6 +59,20 @@ tasks.named('shadowJar') {
     archiveClassifier = ''
 }
 
+// Language-independent regression tests: bin/run-tests runs bin/dump on each
+// tests/*/input.txt and diffs against output.txt.
+def runTests = tasks.register('runTests', Exec) {
+    description = 'Runs the LWON regression tests in tests/ against the Java implementation.'
+    group = 'verification'
+    dependsOn tasks.named('shadowJar')
+    workingDir = projectDir
+    commandLine 'bin/run-tests'
+}
+
+tasks.named('test') {
+    dependsOn runTests
+}
+
 tasks.register('generateJavadoc', Javadoc) {
     source = sourceSets.main.allJava
     classpath = sourceSets.main.compileClasspath
