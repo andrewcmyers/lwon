@@ -52,12 +52,12 @@ public class Parser {
                 case '{':
                     first = expect('{');
                     result = parseDictionary(first);
-                    expect('}');
+                    expectClosing('}', first);
                     return result;
                 case '[':
                     first = expect('[');
                     result = parseArray(first);
-                    expect(']');
+                    expectClosing(']', first);
                     return result;
                 case '"':
                     first = expect('"');
@@ -85,6 +85,17 @@ public class Parser {
             throw new SyntaxError("Expected " + unparseChar(expected), here);
         }
         return here;
+    }
+
+    /** Read the expected closing character, reporting end of input as a SyntaxError
+     *  at the location of the matching opening character.
+     */
+    private void expectClosing(char closing, Location opening) throws SyntaxError {
+        try {
+            expect(closing);
+        } catch (EOF exc) {
+            throw new SyntaxError("Missing closing " + unparseChar(closing), opening);
+        }
     }
 
     private String unparseChar(char c) {
