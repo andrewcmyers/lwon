@@ -2,6 +2,13 @@
 
 # Usage: run-tests [dump-command]
 # The dump command defaults to bin/dump (the Java implementation).
+#
+# Each test directory tests/N contains input.txt and at least one of:
+#   output.txt  the expected standard output
+#   error.txt   the expected position of a syntax error, e.g. "line 2, char 3".
+#               The dump command must exit with a non-zero status and report
+#               that position in its error output. If output.txt is also present,
+#               it must match the output printed before the error.
 my $dump = shift // "bin/dump";
 
 open(TESTS, "<tests/tests.lwon") or die "Cannot open tests/tests.lwon: $!\n";
@@ -9,6 +16,9 @@ open(TESTS, "<tests/tests.lwon") or die "Cannot open tests/tests.lwon: $!\n";
 my $tests = 0;
 my $success = 0;
 my @failed;
+
+my $tmpfile = "/tmp/lwon.tmp.$$";
+my $errfile = "/tmp/lwon.err.$$";
 
 while (<TESTS>) {
     chomp;
@@ -20,20 +30,38 @@ while (<TESTS>) {
     if (! -r $input) {
         print "Not found: $input\n";
     }
-    my $tmpfile = "/tmp/lwon.tmp.$$";
-    if ( 0 == system("$dump $options $dir/input.txt > $tmpfile")) {
-        if (0 == system("diff -u $dir/output.txt $tmpfile")) {
-            $success++;
+    my $status = system("$dump $options $input > $tmpfile 2> $errfile");
+    my $ok;
+    if (-r "$dir/error.txt") {
+        open(EXPECTED, "<$dir/error.txt");
+        my $position = <EXPECTED>;
+        close(EXPECTED);
+        chomp $position;
+        open(ERR, "<$errfile");
+        my $errors = join "", <ERR>;
+        close(ERR);
+        if ($status == 0) {
+            print "Test $test[0]: expected an error at $position, but none was reported\n";
+        } elsif ($errors !~ /\Q$position\E(?!\d)/) {
+            print "Test $test[0]: expected an error at $position, got: $errors";
         } else {
-            push @failed, $test[0];
+            $ok = 1;
         }
+        if ($ok && -r "$dir/output.txt") {
+            $ok = (0 == system("diff -u $dir/output.txt $tmpfile"));
+        }
+    } else {
+        system("cat $errfile");
+        $ok = ($status == 0 && 0 == system("diff -u $dir/output.txt $tmpfile"));
+    }
+    if ($ok) {
+        $success++;
     } else {
         push @failed, $test[0];
     }
-
 }
 
-unlink "/tmp/lwon.tmp.$$";
+unlink $tmpfile, $errfile;
 
 print "$success out of $tests tests succeeded.\n";
 

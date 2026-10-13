@@ -55,8 +55,10 @@ public class Dump {
             }
         } catch (Parser.SyntaxError e) {
             System.err.println(e.getMessage());
+            System.exit(1);
         } catch (FileNotFoundException e) {
             System.err.println("File not found: " + e.getMessage());
+            System.exit(1);
         }
     }
 }

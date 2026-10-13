@@ -98,8 +98,8 @@ public class Parser {
         }
     }
 
-    private String unparseChar(char c) {
-        return StringEscapeUtils.escapeJava(String.valueOf(c));
+    private String unparseChar(int c) {
+        return StringEscapeUtils.escapeJava(Character.toString(c));
     }
 
     private boolean reservedCharacter(char c) {
@@ -421,7 +421,7 @@ public class Parser {
         try {
             for (;;) {
                 skipWhitespace();
-                if (!scanner.hasNext() || scanner.peek() == ']') return builder.build(here);
+                if (!scanner.hasNext() || scanner.peek() == ']') return builder.build(where);
                 here = scanner.location();
                 DataObject obj = parse(here, ",]");
                 builder.set(indices, obj);
@@ -439,7 +439,7 @@ public class Parser {
                         break;
                     case -1:
                     case ']':
-                        return builder.build(here);
+                        return builder.build(where);
                     case '\r':
                     case '\n':
                         int dimout = 0;
@@ -465,7 +465,7 @@ public class Parser {
                         indices[index]++;
                         break;
                     default:
-                        throw new SyntaxError("Unexpected character " + ch, here);
+                        throw new SyntaxError("Unexpected character " + unparseChar(ch), scanner.location());
                 }
             }
         } catch (EOF e) {
