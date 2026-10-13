@@ -1,0 +1,4 @@
+#!/bin/sh
+# Run the Rust LWON implementation's dump program; see rust/src/bin/lwon-dump.rs.
+dir=`dirname "$0"`
+exec cargo run --quiet --release --manifest-path "$dir/../Cargo.toml" --bin lwon-dump -- "$@"

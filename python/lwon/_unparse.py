@@ -24,7 +24,7 @@ def unparse(value, b: list[str], indent: int) -> None:
     dict, grouped by key in dict order.
     Raises TypeError if value or a value within it is of another type."""
     if isinstance(value, str):
-        b.append('"' + _escape_json(value) + '"')
+        b.append('"' + escape(value) + '"')
     elif isinstance(value, Grid):
         _unparse_array(value, _dimensions(value, value.ndim), b, indent)
     elif isinstance(value, list):
@@ -35,23 +35,20 @@ def unparse(value, b: list[str], indent: int) -> None:
         raise TypeError(f'Cannot convert {type(value).__name__} to LWON')
 
 
-def _escape_json(s: str) -> str:
+def escape(s: str) -> str:
+    r"""The text of s as written between the quotation marks of an LWON string.
+    The characters ", \, /, and control characters are written as escape
+    sequences, as are characters outside ASCII: \uXXXX for those in the Basic
+    Multilingual Plane and \u{XXXXX} for supplementary characters."""
     out = []
     for c in s:
         if c in _JSON_ESCAPES:
             out.append(_JSON_ESCAPES[c])
         elif ord(c) < 0x20 or ord(c) > 0x7f:
-            out.append(_unicode_escape(c))
+            out.append(('\\u%04X' if ord(c) <= 0xFFFF else '\\u{%X}') % ord(c))
         else:
             out.append(c)
     return ''.join(out)
-
-
-def _unicode_escape(c: str) -> str:
-    """c as \\uXXXX escapes of its UTF-16 code units."""
-    data = c.encode('utf-16-be', 'surrogatepass')
-    return ''.join('\\u%04X' % int.from_bytes(data[i:i + 2], 'big')
-                   for i in range(0, len(data), 2))
 
 
 def _dimensions(grid: list, ndim: int) -> list[int]:
@@ -107,7 +104,7 @@ def _unparse_dictionary(d: dict, b: list[str], indent: int) -> None:
             b.append(',')
         first = False
         b.append(NEWLINE + '  ' * (indent + 1))
-        b.append('"' + _escape_json(key) + '"' if _needs_quotes(key) else key)
+        b.append('"' + escape(key) + '"' if _needs_quotes(key) else key)
         b.append(': ')
         unparse(value, b, indent + 1)
     b.append(NEWLINE + '  ' * indent + '}')

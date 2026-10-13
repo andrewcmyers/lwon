@@ -1,7 +1,6 @@
 package lwon.data;
 
 import easyIO.BacktrackScanner.Location;
-import org.apache.commons.text.StringEscapeUtils;
 
 import java.util.*;
 
@@ -46,14 +45,6 @@ public class Dictionary extends DataObject {
             }
             mapping.get(e.key).add(e.value);
         }
-    }
-
-    /** A list of all values associated with this key, in the order in which
-     *  they appeared in the input.
-     */
-    public List<DataObject> get(Object key) {
-        List<DataObject> o = mapping.get(key);
-        return o == null ? List.of() : o;
     }
 
     /** A list of all values associated with this key, in the order in which
@@ -112,7 +103,7 @@ public class Dictionary extends DataObject {
     private static void unparseKey(StringBuilder b, String key) {
         if (needsQuotes(key)) {
             b.append("\"");
-            b.append(StringEscapeUtils.escapeJson(key));
+            b.append(Text.escape(key));
             b.append("\"");
         } else {
             b.append(key);

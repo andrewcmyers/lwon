@@ -121,7 +121,13 @@ attractive way.
 
 For long strings, closing whitespace on the first line is ignored,
 if there is no non-whitespace text following the `"`. Standard JSON
-escape sequences are supported. In addition, escape sequences like
+escape sequences are supported. A Unicode escape sequence denotes a
+code point: `\uXXXX` with exactly four hex digits, or `\u{X}` with one
+to six hex digits, such as `\u{1F600}`. As in JSON, a supplementary
+character may also be written as a surrogate pair, such as
+`\uD83D\uDE00`: an escape sequence `\uXXXX` for a high surrogate
+immediately followed by one for a low surrogate. Surrogate code points
+are not allowed otherwise. In addition, escape sequences like
 `\]` and `\ ` may be used to indicate that the next character,
 otherwise special to LWON, is to be taken literally.  A backslash `\`
 at the end of the line means to ignore the newline.  A newline is
@@ -184,7 +190,7 @@ unquoted fields are read as short strings:
 
 ## Implementations
 
-Currently there are two LWON implementations: Java and Python.
+Currently there are three LWON implementations: Java, Python, and Rust.
 
 ### Java Implementation
 
@@ -226,6 +232,28 @@ Python tests can be run using `bin/run-tests python/bin/dump` (the
 shared tests in `tests/`) and
 `cd python && python3 -m unittest discover -s tests`. 
 
+### Rust implementation
+
+The Rust implementation is the `lwon` crate in the `rust/` directory. It
+requires Rust 1.88 or later and has no dependencies. It represents LWON
+values with the type `lwon::Value`, which is text, a multidimensional
+array, or a dictionary whose keys may repeat; each value records where
+it begins in the input. Run `cargo doc --open` in `rust/` for the API
+documentation.
+
+```rust
+let value: lwon::Value = text.parse()?;           // a single LWON value
+let mut parser = lwon::Parser::new(&text, "data.csv");
+while let Some(table) = parser.parse_implicit_array()? {  // e.g., CSV
+    println!("{table:?}");
+}
+println!("{value}");                              // LWON text
+```
+
+`rust/bin/dump` runs the program `lwon-dump`, which works like
+`bin/dump`. Running `cargo test` in `rust/` runs the Rust tests and the
+shared tests in `tests/`.
+
 ## Contributing to LWON
 
 Many things could be done to improve this project, and help from
@@ -234,8 +262,8 @@ outside collaborators is welcome.
 - More thorough testing would be good.
    * Also, testing should be set up as a Github action.
 
-- Implementations for other languages like JavaScript, Rust,
-  or C++ would be a welcome addition.
+- Implementations for other languages like JavaScript or C++ would
+  be a welcome addition.
 
 - Currently the focus is on reading information from external user
   input. Outputting data in human-readable format is also useful

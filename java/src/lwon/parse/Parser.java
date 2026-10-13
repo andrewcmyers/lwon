@@ -6,7 +6,6 @@ import easyIO.Scanner;
 import easyIO.BacktrackScanner.Location;
 import easyIO.UnexpectedInput;
 import lwon.data.*;
-import org.apache.commons.text.StringEscapeUtils;
 
 /**
  *  A Parser for data in LWON format
@@ -111,7 +110,7 @@ public class Parser {
     }
 
     private String unparseChar(int c) {
-        return StringEscapeUtils.escapeJava(Character.toString(c));
+        return c == '/' ? "/" : Text.escape(Character.toString(c));
     }
 
     private boolean reservedCharacter(char c) {
@@ -343,33 +342,7 @@ public class Parser {
             case '/': return "/";
             case '"': return "\"";
             case '\'': return "'";
-            case 'u': {
-                int c = 0;
-                boolean braces = false;
-                if (scanner.peek() == '{') {
-                    braces = true;
-                    expect('{');
-                }
-                // \\uXXXX takes exactly 4 hex digits; \\u{X...} takes 1 to 6.
-                int maxDigits = braces ? 6 : 4;
-                int digits = 0;
-                while (digits < maxDigits && scanner.hasNext()) {
-                    int i = hexdigits.indexOf(Character.toLowerCase(scanner.peek()));
-                    if (i == -1) break;
-                    scanner.next();
-                    c = c * 16 + i;
-                    digits++;
-                }
-                if (digits == 0 || !braces && digits < 4) {
-                    throw new SyntaxError("Expected hex digits in character escape", where);
-                }
-                if (braces) expect('}');
-                if (Character.isValidCodePoint(c)) {
-                    return Character.toString(c);
-                } else {
-                    throw new SyntaxError("Invalid codepoint in character escape", where);
-                }
-            }
+            case 'u': return parseUnicodeEscape(where);
             case '}': return "}";
             case ']': return "]";
             case '#': return "#";
@@ -381,6 +354,69 @@ public class Parser {
             default:
                 throw new SyntaxError("Illegal escape sequence", where);
         }
+    }
+
+    /** Parse the rest of a Unicode escape sequence that begins at {@code where},
+     *  after its {@code u}, and return the character it denotes. An escape
+     *  sequence for a high surrogate must be immediately followed by one for a
+     *  low surrogate, and together they denote one supplementary character.
+     */
+    private String parseUnicodeEscape(Location where) throws SyntaxError, EOF {
+        boolean braces = scanner.peek() == '{';
+        int c = parseCodePoint(braces, where);
+        if (!braces && Character.isHighSurrogate((char) c)) {
+            char low = parseLowSurrogate(where);
+            return Character.toString(Character.toCodePoint((char) c, low));
+        }
+        if (!braces && Character.isLowSurrogate((char) c)) {
+            throw new SyntaxError("Unpaired surrogate in character escape", where);
+        }
+        if (!Character.isValidCodePoint(c)
+            || c >= Character.MIN_SURROGATE && c <= Character.MAX_SURROGATE) {
+            throw new SyntaxError("Invalid codepoint in character escape", where);
+        }
+        return Character.toString(c);
+    }
+
+    /** Parse the hex digits of a Unicode escape sequence that begins at
+     *  {@code where}: exactly four digits, or if {@code braces}, one to six
+     *  digits enclosed in braces. Return the number they denote.
+     */
+    private int parseCodePoint(boolean braces, Location where) throws SyntaxError, EOF {
+        if (braces) expect('{');
+        int maxDigits = braces ? 6 : 4;
+        int c = 0;
+        int digits = 0;
+        while (digits < maxDigits && scanner.hasNext()) {
+            int i = hexdigits.indexOf(Character.toLowerCase(scanner.peek()));
+            if (i == -1) break;
+            scanner.next();
+            c = c * 16 + i;
+            digits++;
+        }
+        if (digits == 0 || !braces && digits < 4) {
+            throw new SyntaxError("Expected hex digits in character escape", where);
+        }
+        if (braces) expect('}');
+        return c;
+    }
+
+    /** Parse a four-digit Unicode escape sequence for a low surrogate, which
+     *  completes the surrogate pair whose escape sequence begins at
+     *  {@code where}, and return the surrogate.
+     */
+    private char parseLowSurrogate(Location where) throws SyntaxError, EOF {
+        if (scanner.peek() == '\\') {
+            scanner.next();
+            if (scanner.peek() == 'u') {
+                scanner.next();
+                if (scanner.peek() != '{') {
+                    int c = parseCodePoint(false, where);
+                    if (Character.isLowSurrogate((char) c)) return (char) c;
+                }
+            }
+        }
+        throw new SyntaxError("Unpaired surrogate in character escape", where);
     }
 
     /** Whether ch is the first character of a line break: \n, \r\n, or \r. */

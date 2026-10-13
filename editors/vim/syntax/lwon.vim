@@ -16,6 +16,10 @@ syntax match lwonShortString /[^ \t{}\[\]:,"\\]\%([^{}\[\],\n\\]\|\\.\)*/
 
 syntax match lwonInvalidEscape /\\./ contained
 syntax match lwonEscape /\\\%(u{\x\{1,6}}\|u\x\{4}\|[rnfbt\\/"' }\]#:]\|$\)/ contained
+" Escapes for surrogate code points are allowed only as a high surrogate
+" followed by a low surrogate.
+syntax match lwonInvalidEscape /\\u\%([dD][89a-fA-F]\x\x\|{0*[dD][89a-fA-F]\x\x}\)/ contained
+syntax match lwonEscape /\\u[dD][89abAB]\x\x\\u[dD][c-fC-F]\x\x/ contained
 syntax match lwonDoubledQuote /""/ contained
 syntax region lwonString matchgroup=lwonQuote start=/"/ skip=/\\.\|""/ end=/"/
       \ contains=lwonComment,lwonEscape,lwonInvalidEscape,lwonDoubledQuote

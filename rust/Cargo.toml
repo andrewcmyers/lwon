@@ -1,0 +1,12 @@
+[package]
+name = "lwon"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+description = "Reading and writing LWON (LightWeight Object Notation)"
+authors = ["Andrew Myers"]
+repository = "https://github.com/andrewcmyers/lwon"
+keywords = ["lwon", "configuration", "parser", "csv"]
+categories = ["parser-implementations", "config"]
+
+[dependencies]

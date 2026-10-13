@@ -7,6 +7,7 @@ from typing import Optional
 
 from ._scanner import EOF, Location, Scanner
 from ._types import Dictionary, Grid, LWONSyntaxError
+from ._unparse import escape
 
 UNEXPECTED_EOF = 'Unexpected end of input'
 RESERVED_CHARS = '{}[]:'
@@ -32,26 +33,8 @@ def _is_newline(c: str) -> bool:
 
 
 def _unparse_char(c: str) -> str:
-    """c, escaped as in Java source text, for use in error messages."""
-    if c in '"\\':
-        return '\\' + c
-    if 0x20 <= ord(c) < 0x7f:
-        return c
-    return ''.join('\\u%04X' % u for u in _utf16(c))
-
-
-def _utf16(c: str) -> list[int]:
-    """The UTF-16 code units of the character c."""
-    data = c.encode('utf-16-be', 'surrogatepass')
-    return [int.from_bytes(data[i:i + 2], 'big') for i in range(0, len(data), 2)]
-
-
-def _join_surrogates(s: str) -> str:
-    """s, with each pair of surrogate code points (as produced by escape sequences
-    such as \\uD83D\\uDE00) replaced by the character they encode."""
-    if not any(0xD800 <= ord(c) <= 0xDFFF for c in s):
-        return s
-    return s.encode('utf-16', 'surrogatepass').decode('utf-16', 'surrogatepass')
+    """c, escaped as in an LWON string except for "/", for use in error messages."""
+    return c if c == '/' else escape(c)
 
 
 class Parser:
@@ -187,7 +170,7 @@ class Parser:
                 ch = s.peek()
                 if ch == '':
                     if not multiline:
-                        return _join_surrogates(''.join(b))
+                        return ''.join(b)
                     raise LWONSyntaxError(UNEXPECTED_EOF, start)
                 elif ch == '\\':
                     if not multiline and ws:
@@ -203,16 +186,16 @@ class Parser:
                             s.accept()
                         else:
                             s.abort()
-                            return _join_surrogates(''.join(b))
+                            return ''.join(b)
                     elif not ws:
                         b.append(s.next())
                     else:
-                        return _join_surrogates(''.join(b))
+                        return ''.join(b)
                 elif ch in '{[':
                     if multiline or not ws:
                         b.append(s.next())
                     else:
-                        return _join_surrogates(''.join(b))
+                        return ''.join(b)
                 elif ch == ' ':
                     if multiline:
                         b.append(s.next())
@@ -220,14 +203,14 @@ class Parser:
                         ws.append(s.next())
                 elif _is_newline(ch):
                     if not multiline:
-                        return _join_surrogates(''.join(b))
+                        return ''.join(b)
                     s.newline()
                     self.skip_comments()
                     b.append(os.linesep)
                     left_column = self._skip_leading_space(left_column)
                 else:
                     if not multiline and ch in delimiters:
-                        return _join_surrogates(''.join(b))
+                        return ''.join(b)
                     if ws:
                         b.extend(ws)
                         ws = []
@@ -283,27 +266,62 @@ class Parser:
                 s.next()
             return ''
         if first == 'u':
-            braces = s.peek() == '{'
-            if braces:
-                self._expect('{')
-            max_digits = 6 if braces else 4
-            c = 0
-            digits = 0
-            while digits < max_digits and s.has_next():
-                i = HEX_DIGITS.find(s.peek().lower())
-                if i == -1:
-                    break
-                s.next()
-                c = c * 16 + i
-                digits += 1
-            if digits == 0 or not braces and digits < 4:
-                raise LWONSyntaxError('Expected hex digits in character escape', where)
-            if braces:
-                self._expect('}')
-            if c > 0x10FFFF:
-                raise LWONSyntaxError('Invalid codepoint in character escape', where)
-            return chr(c)
+            return self._parse_unicode_escape(where)
         raise LWONSyntaxError('Illegal escape sequence', where)
+
+    def _parse_unicode_escape(self, where: Location) -> str:
+        """Parse the rest of a Unicode escape sequence that begins at where, after
+        its u, and return the character it denotes. An escape sequence for a high
+        surrogate must be immediately followed by one for a low surrogate, and
+        together they denote one supplementary character."""
+        braces = self.scanner.peek() == '{'
+        c = self._parse_code_point(braces, where)
+        if not braces and 0xD800 <= c <= 0xDBFF:
+            low = self._parse_low_surrogate(where)
+            return chr(0x10000 + ((c - 0xD800) << 10) + (low - 0xDC00))
+        if not braces and 0xDC00 <= c <= 0xDFFF:
+            raise LWONSyntaxError('Unpaired surrogate in character escape', where)
+        if c > 0x10FFFF or 0xD800 <= c <= 0xDFFF:
+            raise LWONSyntaxError('Invalid codepoint in character escape', where)
+        return chr(c)
+
+    def _parse_code_point(self, braces: bool, where: Location) -> int:
+        """Parse the hex digits of a Unicode escape sequence that begins at where:
+        exactly four digits, or if braces, one to six digits enclosed in braces.
+        Return the number they denote."""
+        s = self.scanner
+        if braces:
+            self._expect('{')
+        max_digits = 6 if braces else 4
+        c = 0
+        digits = 0
+        while digits < max_digits and s.has_next():
+            i = HEX_DIGITS.find(s.peek().lower())
+            if i == -1:
+                break
+            s.next()
+            c = c * 16 + i
+            digits += 1
+        if digits == 0 or not braces and digits < 4:
+            raise LWONSyntaxError('Expected hex digits in character escape', where)
+        if braces:
+            self._expect('}')
+        return c
+
+    def _parse_low_surrogate(self, where: Location) -> int:
+        """Parse a four-digit Unicode escape sequence for a low surrogate, which
+        completes the surrogate pair whose escape sequence begins at where, and
+        return the surrogate."""
+        s = self.scanner
+        if s.peek() == '\\':
+            s.next()
+            if s.peek() == 'u':
+                s.next()
+                if s.peek() != '{':
+                    c = self._parse_code_point(False, where)
+                    if 0xDC00 <= c <= 0xDFFF:
+                        return c
+        raise LWONSyntaxError('Unpaired surrogate in character escape', where)
 
     def skip_blanks(self) -> None:
         """Skip past blanks, which do not include line terminators."""

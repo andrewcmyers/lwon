@@ -98,6 +98,14 @@
     "escape": {
       "patterns": [
         {
+          "match": "\\\\u[dD][89abAB][0-9a-fA-F]{2}\\\\u[dD][c-fC-F][0-9a-fA-F]{2}",
+          "name": "constant.character.escape.lwon"
+        },
+        {
+          "match": "\\\\u(?:[dD][89a-fA-F][0-9a-fA-F]{2}|\\{0*[dD][89a-fA-F][0-9a-fA-F]{2}\\})",
+          "name": "invalid.illegal.surrogate-escape.lwon"
+        },
+        {
           "match": "\\\\(?:u\\{[0-9A-Fa-f]{1,6}\\}|u[0-9A-Fa-f]{4}|[rnfbt\\\\/\"' }\\]#:]|$)",
           "name": "constant.character.escape.lwon"
         },

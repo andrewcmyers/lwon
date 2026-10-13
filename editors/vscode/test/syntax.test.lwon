@@ -72,3 +72,9 @@ address { city: Ithaca }
 nickname "Al"
 # <-------- support.type.property-name.lwon
 #        ^ punctuation.definition.string.begin.lwon
+
+pair: "\uD83D\uDE00 \u{DFFF} \u{1F600} \uD83Dx"
+#      ^^^^^^^^^^^^ constant.character.escape.lwon
+#                   ^^^^^^^^ invalid.illegal.surrogate-escape.lwon
+#                            ^^^^^^^^^ constant.character.escape.lwon
+#                                      ^^^^^^ invalid.illegal.surrogate-escape.lwon

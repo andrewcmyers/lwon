@@ -36,6 +36,8 @@ let s:checks = [
       \ [64, 11, 'lwonShortString'],
       \ [68, 1, 'lwonKey'], [68, 9, 'lwonDelimiter'], [68, 11, 'lwonKey'],
       \ [72, 1, 'lwonKey'], [72, 8, 'lwonKey'], [72, 10, 'lwonQuote'],
+      \ [76, 8, 'lwonEscape'], [76, 19, 'lwonEscape'], [76, 21, 'lwonInvalidEscape'],
+      \ [76, 30, 'lwonEscape'], [76, 40, 'lwonInvalidEscape'], [76, 46, 'lwonString'],
       \ ]
 
 let s:failures = []
