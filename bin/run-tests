@@ -3,7 +3,7 @@
 # Usage: run-tests [dump-command]
 # The dump command defaults to bin/dump (the Java implementation).
 #
-# Each test directory tests/N contains input.txt and at least one of:
+# Each test directory tests/N contains input.lwon and at least one of:
 #   output.txt  the expected standard output
 #   error.txt   the expected position of a syntax error, e.g. "line 2, char 3".
 #               The dump command must exit with a non-zero status and report
@@ -26,7 +26,7 @@ while (<TESTS>) {
     $tests++;
     my $dir = "tests/$test[0]";
     my $options = $test[1];
-    my $input = "$dir/input.txt";
+    my $input = "$dir/input.lwon";
     if (! -r $input) {
         print "Not found: $input\n";
     }

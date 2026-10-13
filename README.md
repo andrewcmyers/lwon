@@ -64,6 +64,8 @@ Germany, 84, 3.7
 
 See the directory `tests/` for more short examples.
 
+The extension  `.lwon` is suggested for files in LWON format.
+
 ## Syntax
 
 Although all the mandated syntax sticks to ASCII, LWON input is a
