@@ -53,6 +53,10 @@ while (<TESTS>) {
     } else {
         system("cat $errfile");
         $ok = ($status == 0 && 0 == system("diff -u $dir/output.txt $tmpfile"));
+        if ($ok) {
+            my $status2 = system("$dump $dir/output.txt > $tmpfile");
+            $ok = ($status2 == 0 && 0 == system("diff -u $dir/output.txt $tmpfile"));
+        }
     }
     if ($ok) {
         $success++;
