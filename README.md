@@ -194,10 +194,10 @@ Currently there are three LWON implementations: Java, Python, and Rust.
 
 ### Java Implementation
 
-The Java implementation can be built as a runnable JAR file using the
-command `gradle shadowJar`. The script `bin/dump` is an example using
-this API. It reads in a file as a sequence of LWON objects and prints
-each of them to standard output.
+The Java implementation can be built as a runnable JAR file using the command
+`gradle shadowJar`. The script `bin/dump` is an example that uses the Java API.
+It reads in a file as a sequence of LWON objects and prints each back out
+in LWON format to standard output.
 
 Javadoc documentation for the Java implementation
 can be found in the `docs/` directory or [at the web
@@ -235,24 +235,12 @@ shared tests in `tests/`) and
 ### Rust implementation
 
 The Rust implementation is the `lwon` crate in the `rust/` directory. It
-requires Rust 1.88 or later and has no dependencies. It represents LWON
-values with the type `lwon::Value`, which is text, a multidimensional
-array, or a dictionary whose keys may repeat; each value records where
-it begins in the input. Run `cargo doc --open` in `rust/` for the API
-documentation.
-
-```rust
-let value: lwon::Value = text.parse()?;           // a single LWON value
-let mut parser = lwon::Parser::new(&text, "data.csv");
-while let Some(table) = parser.parse_implicit_array()? {  // e.g., CSV
-    println!("{table:?}");
-}
-println!("{value}");                              // LWON text
-```
-
-`rust/bin/dump` runs the program `lwon-dump`, which works like
-`bin/dump`. Running `cargo test` in `rust/` runs the Rust tests and the
-shared tests in `tests/`.
+requires Rust 1.88 or later. Its only dependency is serde, for the
+optional (default) `serde` feature, which converts between LWON and
+Rust types. It represents LWON values with the type `lwon::Value`,
+which is text, a multidimensional array, or a dictionary whose keys may
+repeat; each value records where it begins in the input. Run
+`cargo doc --open` in `rust/` for the API documentation.
 
 ## Contributing to LWON
 

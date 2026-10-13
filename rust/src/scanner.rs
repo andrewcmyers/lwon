@@ -125,7 +125,7 @@ impl Scanner {
     pub fn error(&self, pos: usize, message: impl Into<String>) -> Error {
         Error::new(
             message,
-            &self.name,
+            Some(&self.name),
             Some(self.locations[pos]),
             Some(self.chars[pos]),
         )
@@ -133,6 +133,6 @@ impl Scanner {
 
     /// An error with the given message and no location.
     pub fn error_without_location(&self, message: impl Into<String>) -> Error {
-        Error::new(message, &self.name, None, None)
+        Error::new(message, Some(&self.name), None, None)
     }
 }

@@ -10,3 +10,11 @@ keywords = ["lwon", "configuration", "parser", "csv"]
 categories = ["parser-implementations", "config"]
 
 [dependencies]
+serde = { version = "1", optional = true }
+
+[dev-dependencies]
+serde = { version = "1", features = ["derive"] }
+
+[features]
+default = ["serde"]
+serde = ["dep:serde"]

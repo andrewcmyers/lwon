@@ -147,6 +147,6 @@ fn errors_display_their_location() {
         e.to_string(),
         "\"f.lwon\", line 1, char 6 ([): Missing closing ]"
     );
-    assert_eq!(e.name(), "f.lwon");
+    assert_eq!(e.name(), Some("f.lwon"));
     assert_eq!(e.message(), "Missing closing ]");
 }
