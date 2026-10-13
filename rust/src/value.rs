@@ -204,11 +204,15 @@ impl Array {
         }
     }
 
-    pub(crate) fn at(dimensions: Vec<usize>, elements: Vec<Value>, location: Location) -> Array {
+    pub(crate) fn at(
+        dimensions: Vec<usize>,
+        elements: Vec<Value>,
+        location: Option<Location>,
+    ) -> Array {
         Array {
             dimensions,
             elements,
-            location: Some(location),
+            location,
         }
     }
 

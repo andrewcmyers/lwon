@@ -544,7 +544,7 @@ fn build_array(entries: Vec<(Vec<usize>, Value)>, location: crate::Location) -> 
     let ndim = entries.iter().map(|(ix, _)| ix.len()).max().unwrap_or(0);
     if ndim == 0 {
         let elements: Vec<Value> = entries.into_iter().map(|(_, v)| v).collect();
-        return Array::at(vec![elements.len()], elements, location);
+        return Array::at(vec![elements.len()], elements, Some(location));
     }
     let mut dimensions = vec![0; ndim];
     for (ix, _) in &entries {
@@ -563,5 +563,5 @@ fn build_array(entries: Vec<(Vec<usize>, Value)>, location: crate::Location) -> 
             .fold(0, |i, (j, &n)| i * dimensions[j + offset] + n);
         elements[i] = value;
     }
-    Array::at(dimensions, elements, location)
+    Array::at(dimensions, elements, Some(location))
 }

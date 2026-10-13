@@ -41,7 +41,7 @@ fn single_entry(key: &str, value: Value) -> Option<Value> {
 /// The array with the given elements. If there are at least two elements and
 /// they are nonempty arrays of the same dimensions, they are combined into an
 /// array of one more dimension; otherwise, the array is one-dimensional.
-fn array_of(elements: Vec<Value>) -> Array {
+pub(crate) fn array_of(elements: Vec<Value>) -> Array {
     if elements.len() >= 2
         && let Some(Value::Array(first)) = elements.first()
         && !first.is_empty()
@@ -63,6 +63,49 @@ fn array_of(elements: Vec<Value>) -> Array {
         }
     }
     Array::from(elements)
+}
+
+/// A value is serialized as a string if it is text, as a map with its entries
+/// in order (including repeated keys) if it is a dictionary, and as a sequence
+/// if it is an array. An array of more than one dimension is a sequence of
+/// arrays, one for each index of its first dimension.
+impl Serialize for Value {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        match self {
+            Value::Text(t) => serializer.serialize_str(t),
+            Value::Array(a) => ArraySlice {
+                dimensions: a.dimensions(),
+                elements: a.elements(),
+            }
+            .serialize(serializer),
+            Value::Dictionary(d) => {
+                let mut map = serializer.serialize_map(Some(d.len()))?;
+                for (key, value) in d {
+                    map.serialize_entry(key, value)?;
+                }
+                map.end()
+            }
+        }
+    }
+}
+
+/// An array, or the subarray at one index of an array's outer dimensions.
+struct ArraySlice<'a> {
+    dimensions: &'a [usize],
+    elements: &'a [Value],
+}
+
+impl Serialize for ArraySlice<'_> {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        if self.dimensions.len() <= 1 {
+            return serializer.collect_seq(self.elements);
+        }
+        let size = self.elements.len() / self.dimensions[0];
+        serializer.collect_seq((0..self.dimensions[0]).map(|i| ArraySlice {
+            dimensions: &self.dimensions[1..],
+            elements: &self.elements[i * size..(i + 1) * size],
+        }))
+    }
 }
 
 /// Serializes data as an LWON value, or as `None` if the data is `None`.

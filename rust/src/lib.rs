@@ -74,6 +74,13 @@
 //! Errors from deserialization give the location of the value that caused
 //! them.
 //!
+//! [`Value`] itself implements `Deserialize` and `Serialize`, so part of the
+//! data can be left untyped by giving a field the type `Value`. A `Value`
+//! deserialized from LWON is an exact copy, including its locations, except
+//! that the values of a repeated key form a one-dimensional array. `Value` can
+//! also be converted to and from other serde formats, such as JSON; numbers
+//! and booleans from them become text, and null becomes empty text.
+//!
 //! # Serializing with serde
 //!
 //! Serialization represents Rust data as deserialization does, so that

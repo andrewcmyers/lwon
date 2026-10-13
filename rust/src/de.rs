@@ -1,3 +1,4 @@
+use std::cell::Cell;
 use std::collections::HashMap;
 use std::fmt;
 
@@ -8,6 +9,7 @@ use serde::de::{
 };
 use serde::{Deserialize, Deserializer, forward_to_deserialize_any};
 
+use crate::ser::array_of;
 use crate::{Array, Dictionary, Error, Location, Value};
 
 /// Deserialize an instance of `T` from the single LWON value in text, as
@@ -25,6 +27,119 @@ pub fn from_str<T: DeserializeOwned>(text: &str) -> Result<T, Error> {
 /// value does not represent a `T`.
 pub fn from_value<'de, T: Deserialize<'de>>(value: &'de Value) -> Result<T, Error> {
     T::deserialize(value)
+}
+
+/// The name of the newtype struct that `Value::deserialize` requests. The
+/// deserializers in this crate respond with an exact copy of the value, keeping
+/// its repeated keys, array dimensions, and locations; other deserializers treat
+/// the newtype struct as its contents.
+const VALUE_TOKEN: &str = "$lwon::private::Value";
+
+thread_local! {
+    /// The copy of a value being passed to ValueVisitor by visit_copy.
+    static COPY: Cell<Option<Value>> = const { Cell::new(None) };
+}
+
+/// Pass value to visitor, which is a ValueVisitor. A Visitor can receive only
+/// primitive data, so the value travels through COPY, and the visitor
+/// receives VALUE_TOKEN as text telling it to take the value from there.
+fn visit_copy<'de, V: Visitor<'de>>(value: Value, visitor: V) -> Result<V::Value, Error> {
+    COPY.set(Some(value));
+    let result = visitor.visit_borrowed_str(VALUE_TOKEN);
+    COPY.take();
+    result
+}
+
+/// A value is deserialized from strings, which become text; from booleans,
+/// numbers, and characters, which become text representing them; from
+/// sequences, which become arrays as in [`to_value`](crate::to_value); and
+/// from maps, whose entries become dictionary entries. A unit or null value
+/// becomes empty text. A value deserialized from LWON by [`from_value`] or
+/// [`from_str`] is an exact copy of the LWON value, including its locations,
+/// except that the values of a repeated key form a one-dimensional array.
+impl<'de> Deserialize<'de> for Value {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Value, D::Error> {
+        deserializer.deserialize_newtype_struct(VALUE_TOKEN, ValueVisitor)
+    }
+}
+
+struct ValueVisitor;
+
+/// Defines Visitor methods that represent their argument as text.
+macro_rules! visit_as_text {
+    ($($method:ident($ty:ty);)*) => {$(
+        fn $method<E: de::Error>(self, v: $ty) -> Result<Value, E> {
+            Ok(Value::from(v.to_string()))
+        }
+    )*};
+}
+
+impl<'de> Visitor<'de> for ValueVisitor {
+    type Value = Value;
+
+    fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("an LWON value")
+    }
+
+    visit_as_text! {
+        visit_bool(bool); visit_i64(i64); visit_i128(i128); visit_u64(u64);
+        visit_u128(u128); visit_f64(f64); visit_char(char);
+    }
+
+    fn visit_str<E: de::Error>(self, v: &str) -> Result<Value, E> {
+        if v == VALUE_TOKEN
+            && let Some(value) = COPY.take()
+        {
+            return Ok(value);
+        }
+        Ok(Value::from(v))
+    }
+
+    fn visit_string<E: de::Error>(self, v: String) -> Result<Value, E> {
+        Ok(Value::from(v))
+    }
+
+    fn visit_bytes<E: de::Error>(self, v: &[u8]) -> Result<Value, E> {
+        match std::str::from_utf8(v) {
+            Ok(s) => Ok(Value::from(s)),
+            Err(_) => Err(E::invalid_value(Unexpected::Bytes(v), &self)),
+        }
+    }
+
+    fn visit_none<E: de::Error>(self) -> Result<Value, E> {
+        Ok(Value::from(""))
+    }
+
+    fn visit_some<D: Deserializer<'de>>(self, deserializer: D) -> Result<Value, D::Error> {
+        Value::deserialize(deserializer)
+    }
+
+    fn visit_unit<E: de::Error>(self) -> Result<Value, E> {
+        Ok(Value::from(""))
+    }
+
+    fn visit_newtype_struct<D: Deserializer<'de>>(
+        self,
+        deserializer: D,
+    ) -> Result<Value, D::Error> {
+        deserializer.deserialize_any(self)
+    }
+
+    fn visit_seq<A: SeqAccess<'de>>(self, mut seq: A) -> Result<Value, A::Error> {
+        let mut elements = Vec::new();
+        while let Some(element) = seq.next_element()? {
+            elements.push(element);
+        }
+        Ok(array_of(elements).into())
+    }
+
+    fn visit_map<A: MapAccess<'de>>(self, mut map: A) -> Result<Value, A::Error> {
+        let mut d = Dictionary::new();
+        while let Some((key, value)) = map.next_entry::<String, Value>()? {
+            d.push(key, value);
+        }
+        Ok(d.into())
+    }
 }
 
 fn unexpected(value: &Value) -> Unexpected<'_> {
@@ -81,9 +196,12 @@ impl<'de> Deserializer<'de> for &'de Value {
 
     fn deserialize_newtype_struct<V: Visitor<'de>>(
         self,
-        _name: &'static str,
+        name: &'static str,
         visitor: V,
     ) -> Result<V::Value, Error> {
+        if name == VALUE_TOKEN {
+            return visit_copy(self.clone(), visitor);
+        }
         visitor.visit_newtype_struct(self)
     }
 
@@ -379,9 +497,17 @@ impl<'de> Deserializer<'de> for ArrayView<'de> {
 
     fn deserialize_newtype_struct<V: Visitor<'de>>(
         self,
-        _name: &'static str,
+        name: &'static str,
         visitor: V,
     ) -> Result<V::Value, Error> {
+        if name == VALUE_TOKEN {
+            let array = Array::at(
+                self.dimensions.to_vec(),
+                self.elements.to_vec(),
+                self.location,
+            );
+            return visit_copy(array.into(), visitor);
+        }
         visitor.visit_newtype_struct(self)
     }
 
@@ -639,10 +765,23 @@ impl<'de> Deserializer<'de> for Entry<'de> {
 
     fn deserialize_newtype_struct<V: Visitor<'de>>(
         self,
-        _name: &'static str,
+        name: &'static str,
         visitor: V,
     ) -> Result<V::Value, Error> {
-        visitor.visit_newtype_struct(self)
+        if name != VALUE_TOKEN {
+            return visitor.visit_newtype_struct(self);
+        }
+        match self.values[..] {
+            [value] => value.deserialize_newtype_struct(name, visitor),
+            _ => {
+                let location = self.location();
+                let values: Vec<Value> = self.values.into_iter().cloned().collect();
+                visit_copy(
+                    Array::at(vec![values.len()], values, location).into(),
+                    visitor,
+                )
+            }
+        }
     }
 
     fn deserialize_ignored_any<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Error> {
