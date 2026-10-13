@@ -315,7 +315,7 @@ public class Parser {
         }
     }
 
-    String hexdigits = "0123456789abcdef";
+    private static final String hexdigits = "0123456789abcdef";
     private String parseEscapeSequence() throws SyntaxError, EOF {
         Location where = scanner.location();
         expect('\\');
@@ -338,11 +338,18 @@ public class Parser {
                     braces = true;
                     expect('{');
                 }
+                // \\uXXXX takes exactly 4 hex digits; \\u{X...} takes 1 to 6.
+                int maxDigits = braces ? 6 : 4;
                 int digits = 0;
-                while (scanner.hasNext()) {
+                while (digits < maxDigits && scanner.hasNext()) {
                     int i = hexdigits.indexOf(Character.toLowerCase(scanner.peek()));
-                    if (i == -1 || !braces && ++digits >= 4) break;
+                    if (i == -1) break;
+                    scanner.next();
                     c = c * 16 + i;
+                    digits++;
+                }
+                if (digits == 0 || !braces && digits < 4) {
+                    throw new SyntaxError("Expected hex digits in character escape", where);
                 }
                 if (braces) expect('}');
                 if (Character.isValidCodePoint(c)) {

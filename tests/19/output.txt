@@ -1,0 +1,9 @@
+"a\uD83D\uDE00b"
+"x\uD83D\uDE00y"
+"\uD83D\uDE00\uD83D\uDE00"
+[
+  "\uD83D\uDE00", "\uD83D\uDE00z"
+]
+{
+  v: "w\uD83D\uDE00"
+}
