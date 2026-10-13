@@ -52,6 +52,7 @@ public class Array extends DataObject implements Iterable<DataObject> {
     /** Produce a new Array in which all dimensions of size 1 are removed. This can be used to
      * convert a single-column array into a single-row array. */
     public Array squeeze() {
+        if (data.length == 0) return new Array(new int[]{0}, new DataObject[0], location());
         ArrayList<Integer> newDims = new ArrayList<>();
         for (int i : dimensions) {
             if (i > 1) newDims.add(i);
@@ -59,7 +60,6 @@ public class Array extends DataObject implements Iterable<DataObject> {
         int[] newDimsArr = new int[newDims.size()];
         for (int i = 0; i < newDims.size(); i++)
             newDimsArr[i] = newDims.get(i);
-        if (data.length == 0) newDimsArr = new int[0];
         return new Array(newDimsArr, data.clone(), location());
     }
 
