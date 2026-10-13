@@ -1,0 +1,15 @@
+{
+  plain: 1
+  two words: 2
+  "quoted": 3
+  "a:b": 4
+  "": 5
+  " lead": 6
+  "#hash": 7
+  "x\ny": 8
+  "{brace": 9
+  "back\\slash": 10
+  k\:esc: 11
+  "k" 12
+  k😀: 13
+}

@@ -10,8 +10,8 @@ import java.util.*;
  *  a list of each of the values it is associated with, in the same order.
  */
 public class Dictionary extends DataObject {
-    private Map<String, List<DataObject>> mapping;
-    private List<Entry> entries;
+    private final Map<String, List<DataObject>> mapping;
+    private final List<Entry> entries;
 
     /** A key-value pair */
     public record Entry(String key, DataObject value) {}
@@ -30,7 +30,7 @@ public class Dictionary extends DataObject {
 
         /** Create a new dictionary from the stored data. */
         public Dictionary build(Location where) {
-            return new Dictionary(entries, where);
+            return new Dictionary(List.copyOf(entries), where);
         }
     }
 

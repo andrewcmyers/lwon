@@ -32,20 +32,18 @@ public class Parser {
      *  if any, are treated as if they were whitespace.
      */
     public DataObject parse() throws SyntaxError, EOF {
-        Location location = scanner.location();
         skipComments();
-        return parse(location, "");
+        return parse("");
     }
 
-    /** Parse an object from the input, assuming that start can be treated as the
-     *  starting position of the object. The characters in delimiters should be
+    /** Parse an object from the input. The characters in delimiters should be
      *  treated as delimiters terminating this object.
      *  Required: the current line is not a comment.
      */
-    public DataObject parse(Location start, String delimiters) throws EOF, SyntaxError {
+    private DataObject parse(String delimiters) throws EOF, SyntaxError {
             DataObject result;
-            Location first = scanner.location();
             skipWhitespace();
+            Location first = scanner.location();
             int c = scanner.peek();
             switch (c) {
                 case -1: throw new EOF();
@@ -133,7 +131,7 @@ public class Parser {
                     scanner.next();
                     skipWhitespace();
                 }
-                DataObject value = parse(scanner.location(), "}");
+                DataObject value = parse("}");
                 b.put(key, value);
                 skipWhitespace();
                 if (scanner.peek() == ',') scanner.next();
@@ -249,7 +247,8 @@ public class Parser {
                           b.append(System.lineSeparator());
                           leftColumn = skipLeadingSpace(leftColumn);
                       } catch (UnexpectedInput e) {
-                          b.append(Character.toChars(ch));
+                          // not a line separator (e.g., a lone \r): keep it as ordinary text
+                          b.append(scanner.next());
                       }
                       break;
                   default:
@@ -313,27 +312,6 @@ public class Parser {
         while (scanner.peek() == ' ' && scanner.column() < leftColumn)
             scanner.next();
         return scanner.column();
-    }
-
-    static final String sep = System.lineSeparator();
-
-    /** If the next characters on the input are */
-    private boolean atNewline() {
-        try {
-            scanner.mark();
-            // assume line separator does not contain supplementary characters
-            for (int i = 0; i < sep.length(); i++) {
-                if (scanner.next() != sep.charAt(i)) {
-                    scanner.abort();
-                    return false;
-                }
-            }
-            scanner.accept();
-            return true;
-        } catch (EOF exc) {
-            scanner.abort();
-            return false;
-        }
     }
 
     private static final String hexdigits = "0123456789abcdef";
@@ -430,7 +408,7 @@ public class Parser {
                 skipWhitespace();
                 if (!scanner.hasNext() || scanner.peek() == ']') return builder.build(where);
                 here = scanner.location();
-                DataObject obj = parse(here, ",]");
+                DataObject obj = parse(",]");
                 builder.set(indices, obj);
                 skipBlanks();
                 int ch = scanner.peek();
