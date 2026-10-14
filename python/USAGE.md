@@ -47,8 +47,13 @@ optional `reduce` parameter specifies how to combine multiple values; for
 example, `lwon.flatten(value, reduce=lambda values: values[-1])` keeps
 the last value of a key.
 
+#### Tools and Tests
+
 The command `lwon-dump [-a] [-d] file...`, installed by `pip`, works
 like `bin/dump`; so do `python3 -m lwon` and, without installation,
 `python/bin/dump`.
 
+Python tests can be run using `bin/run-tests python/bin/dump` (the
+shared tests in `tests/`) and
+`cd python && python3 -m unittest discover -s tests`. 
 

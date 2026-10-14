@@ -74,6 +74,28 @@
 //! Errors from deserialization give the location of the value that caused
 //! them.
 //!
+//! ## Serde attributes that buffer data
+//!
+//! In LWON, every scalar is text, and the type it is read as determines what
+//! it means: `5432` is a number when read as a `u16` and a string when read
+//! as a `String`. Some serde attributes, however, make serde read data
+//! before it knows the types of the fields it belongs to, and keep it until
+//! it does: `#[serde(flatten)]`, internally tagged enums (`#[serde(tag =
+//! "...")]`), adjacently tagged enums (`#[serde(tag = "...", content =
+//! "...")]`), and `#[serde(untagged)]`. Data kept this way reaches its fields
+//! as strings, so a field of another type, such as a number or a boolean,
+//! fails to deserialize unless it is marked `#[serde(with = "lwon::text")]`
+//! (or `#[serde(with = "lwon::text::option", default)]` for an `Option`),
+//! which parses the string with the field type's [`FromStr`](std::str::FromStr)
+//! implementation; see [`text`]. String fields need no marking. The variants
+//! of an untagged enum are tried with strings, so a variant holding a string
+//! matches any scalar.
+//!
+//! Enums are best written in serde's default form, a dictionary with a
+//! single entry naming the variant, such as `{ Circle: 1.5 }`, or text
+//! naming a variant without data. Their data is read knowing the variant,
+//! so no marking is needed.
+//!
 //! [`Value`] itself implements `Deserialize` and `Serialize`, so part of the
 //! data can be left untyped by giving a field the type `Value`. A `Value`
 //! deserialized from LWON is an exact copy, including its locations, except
@@ -124,6 +146,8 @@ mod parser;
 mod scanner;
 #[cfg(feature = "serde")]
 mod ser;
+#[cfg(feature = "serde")]
+pub mod text;
 mod unparse;
 mod value;
 

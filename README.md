@@ -220,17 +220,11 @@ Install it with
 `pip install ./python` (or, with pip 21.3 or later,
 `pip install -e ./python` to use the source in place), or add
 `python/` to `PYTHONPATH`. Its interface resembles that of the
-standard `json` module:
+standard `json` module.
 
 #### Usage
 
 See python/USAGE.md for how to use the Python implementation.
-
-#### Tests
-
-Python tests can be run using `bin/run-tests python/bin/dump` (the
-shared tests in `tests/`) and
-`cd python && python3 -m unittest discover -s tests`. 
 
 ### Rust implementation
 
