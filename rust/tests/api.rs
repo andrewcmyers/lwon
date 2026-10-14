@@ -150,3 +150,20 @@ fn errors_display_their_location() {
     assert_eq!(e.name(), Some("f.lwon"));
     assert_eq!(e.message(), "Missing closing ]");
 }
+
+#[test]
+fn shapes_that_text_cannot_express() {
+    for (dims, read_back) in [
+        (vec![], vec![1]),
+        (vec![1, 3], vec![3]),
+        (vec![1, 2, 3], vec![2, 3]),
+        (vec![2, 0], vec![0]),
+        (vec![3, 1], vec![3, 1]),
+        (vec![2, 1, 3], vec![2, 1, 3]),
+    ] {
+        let n = dims.iter().product();
+        let a = Array::new(dims.clone(), vec![text("x"); n]);
+        let back: Value = Value::from(a).to_string().parse().unwrap();
+        assert_eq!(back.as_array().unwrap().dimensions(), read_back, "{dims:?}");
+    }
+}

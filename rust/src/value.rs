@@ -15,8 +15,13 @@ pub struct Location {
 /// An LWON value. Values produced by a [`Parser`] record the location where
 /// they begin; equality of values ignores locations.
 ///
-/// The [`Display`](fmt::Display) form of a value is its LWON text, written
-/// with all strings and non-identifier keys quoted.
+/// The [`Display`](fmt::Display) form of a value is its LWON text, with all
+/// strings quoted and keys quoted where needed to read them back unchanged.
+/// Parsing the text gives back an equal value, except for arrays whose shape
+/// LWON text cannot express: an array with no dimensions is read back as one
+/// with dimensions `[1]`; leading dimensions of size 1 are lost, so that
+/// dimensions `[1, 3]` are read back as `[3]`; and an empty array of more than
+/// one dimension is read back as one with dimensions `[0]`.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Value {
     Text(Text),

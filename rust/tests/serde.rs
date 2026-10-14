@@ -194,3 +194,22 @@ fn empty_text_is_unit() {
     assert_eq!(units.len(), 2);
     assert!(lwon::from_str::<()>("x").is_err());
 }
+
+#[test]
+fn repeated_keys_are_not_tuples_or_fixed_size_arrays() {
+    #[derive(Debug, Deserialize)]
+    struct Pair {
+        #[allow(dead_code)]
+        p: [u32; 2],
+    }
+    let e = lwon::from_str::<Pair>("{ p: 1\n p: 2 }").unwrap_err();
+    assert_eq!(e.message(), "key `p` is repeated");
+    let ok: Pair = lwon::from_str("{ p [1, 2] }").unwrap();
+    assert_eq!(ok.p, [1, 2]);
+    let set: std::collections::BTreeSet<u32> =
+        lwon::from_str::<HashMap<String, std::collections::BTreeSet<u32>>>("{ s: 2\n s: 1 }")
+            .unwrap()
+            .remove("s")
+            .unwrap();
+    assert_eq!(set.into_iter().collect::<Vec<_>>(), [1, 2]);
+}

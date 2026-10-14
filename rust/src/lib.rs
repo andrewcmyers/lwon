@@ -64,10 +64,13 @@
 //! - A dictionary represents a map or struct. A dictionary with a single
 //!   entry also represents an enum variant: the key is the variant's name
 //!   and the value is its data.
-//! - A repeated key's values, in order, form a sequence, which is an error
-//!   where a sequence is not expected. Where a sequence is expected for a key
-//!   that is not repeated, the key's value is a sequence of one value unless
-//!   it is an array.
+//! - A repeated key's values, in order, form a sequence, such as a `Vec`,
+//!   `VecDeque`, or `HashSet`; a repeated key is an error where such a
+//!   sequence is not expected. Where one is expected for a key that is not
+//!   repeated, the key's value is a sequence of one value unless it is an
+//!   array. Tuples and fixed-size arrays such as `[T; 2]` are not sequences
+//!   in this sense: they are read from a single value, which must be an
+//!   array, so a repeated key is an error for them.
 //! - A value present for an `Option` represents `Some`. A missing struct field
 //!   of type `Option` is `None`.
 //!
